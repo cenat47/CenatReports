@@ -1,5 +1,7 @@
 from sqlalchemy import String
-from sqlalchemy.orm import Mapped, mapped_column, relationship, declarative_base
+from sqlalchemy.orm import (Mapped, declarative_base, mapped_column,
+                            relationship)
+
 from src.database import Base
 
 

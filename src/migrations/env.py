@@ -1,21 +1,14 @@
 from logging.config import fileConfig
 
-from sqlalchemy import engine_from_config
-from sqlalchemy import pool
-
 from alembic import context
 from sqlalchemy import engine_from_config, pool
+
 from src.config import settings
 from src.database import Base
-from src.models.commerce import (
-    category,
-    customer,
-    order_item,
-    order,
-    payment,
-    product,
-    supplier,
-)  # noqa: F403
+from src.models.auth import refresh_token, user
+from src.models.commerce import (category, customer, order,  # noqa: F403
+                                 order_item, payment, product, supplier)
+from src.models.report import report_task, report_template
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

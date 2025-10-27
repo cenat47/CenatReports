@@ -1,17 +1,25 @@
+import sys
+from pathlib import Path
+
+project_root = Path(__file__).parent.parent
+sys.path.insert(0, str(project_root))
+
 import asyncio
-from datetime import datetime, timedelta
 import random
+from datetime import datetime, timedelta
+
 from faker import Faker
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import sessionmaker
+
 from src.database import engine
 from src.models.commerce.category import CategoryOrm
-from src.models.commerce.supplier import SupplierOrm
-from src.models.commerce.product import ProductOrm
 from src.models.commerce.customer import CustomerOrm
 from src.models.commerce.order import OrderOrm
 from src.models.commerce.order_item import OrderItemOrm
 from src.models.commerce.payment import PaymentOrm
+from src.models.commerce.product import ProductOrm
+from src.models.commerce.supplier import SupplierOrm
 
 fake = Faker()
 

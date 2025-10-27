@@ -1,15 +1,16 @@
-import sys
-from pathlib import Path
-import uvicorn
-from contextlib import asynccontextmanager
 import logging
-from fastapi import FastAPI
+import sys
+from contextlib import asynccontextmanager
+from pathlib import Path
 
+import uvicorn
+from fastapi import FastAPI
 
 sys.path.append(str(Path(__file__).parent.parent))
 
 from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
+
 from src.init import redis_manager
 
 
