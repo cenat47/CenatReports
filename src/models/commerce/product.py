@@ -4,7 +4,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from src.database import Base
 
 
-class ProductOrm(Base):
+class ProductORM(Base):
     __tablename__ = "products"
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -13,6 +13,6 @@ class ProductOrm(Base):
     category_id: Mapped[int] = mapped_column(ForeignKey("categories.id"))
     supplier_id: Mapped[int] = mapped_column(ForeignKey("suppliers.id"))
 
-    category: Mapped["CategoryOrm"] = relationship(back_populates="products")
-    supplier: Mapped["SupplierOrm"] = relationship(back_populates="products")
+    category: Mapped["CategoryORM"] = relationship(back_populates="products")
+    supplier: Mapped["SupplierORM"] = relationship(back_populates="products")
     order_items: Mapped[list["OrderItemOrm"]] = relationship(back_populates="product")

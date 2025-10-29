@@ -6,7 +6,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 from src.database import Base
 
 
-class ReportTask(Base):
+class ReportTaskORM(Base):
     __tablename__ = "report_tasks"
 
     id: Mapped[int] = mapped_column(primary_key=True)

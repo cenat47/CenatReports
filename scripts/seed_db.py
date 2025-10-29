@@ -13,13 +13,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import sessionmaker
 
 from src.database import engine
-from src.models.commerce.category import CategoryOrm
-from src.models.commerce.customer import CustomerOrm
-from src.models.commerce.order import OrderOrm
+from src.models.commerce.category import CategoryORM
+from src.models.commerce.customer import CustomerORM
+from src.models.commerce.order import OrderORM
 from src.models.commerce.order_item import OrderItemOrm
-from src.models.commerce.payment import PaymentOrm
-from src.models.commerce.product import ProductOrm
-from src.models.commerce.supplier import SupplierOrm
+from src.models.commerce.payment import PaymentORM
+from src.models.commerce.product import ProductORM
+from src.models.commerce.supplier import SupplierORM
 
 fake = Faker()
 
@@ -35,7 +35,7 @@ AsyncSessionLocal = sessionmaker(engine, expire_on_commit=False, class_=AsyncSes
 async def create_categories(session):
     categories = []
     for _ in range(NUM_CATEGORIES):
-        c = CategoryOrm(name=fake.word()[:100].capitalize())
+        c = CategoryORM(name=fake.word()[:100].capitalize())
         session.add(c)
         categories.append(c)
     await session.commit()
@@ -45,7 +45,7 @@ async def create_categories(session):
 async def create_suppliers(session):
     suppliers = []
     for _ in range(NUM_SUPPLIERS):
-        s = SupplierOrm(name=fake.company()[:100], contact_info=fake.email()[:200])
+        s = SupplierORM(name=fake.company()[:100], contact_info=fake.email()[:200])
         session.add(s)
         suppliers.append(s)
     await session.commit()
@@ -55,7 +55,7 @@ async def create_suppliers(session):
 async def create_products(session, categories, suppliers):
     products = []
     for _ in range(NUM_PRODUCTS):
-        p = ProductOrm(
+        p = ProductORM(
             name=fake.word()[:100].capitalize(),
             price=round(random.uniform(5, 500), 2),
             category_id=random.choice(categories).id,
@@ -70,7 +70,7 @@ async def create_products(session, categories, suppliers):
 async def create_customers(session):
     customers = []
     for _ in range(NUM_CUSTOMERS):
-        c = CustomerOrm(
+        c = CustomerORM(
             name=fake.name()[:100],
             email=fake.unique.email()[:100],
             phone=fake.phone_number()[:20],
@@ -87,7 +87,7 @@ async def create_orders(session, customers, products):
     for _ in range(NUM_ORDERS):
         customer = random.choice(customers)
         order_date = fake.date_between(start_date="-1y", end_date="today")
-        o = OrderOrm(
+        o = OrderORM(
             customer_id=customer.id,
             order_date=order_date,
             status=random.choice(["pending", "paid", "shipped"]),
@@ -122,7 +122,7 @@ async def create_payments(session, orders):
                 break
             amount = round(random.uniform(10, order.total_amount - paid), 2)
             paid += amount
-            p = PaymentOrm(
+            p = PaymentORM(
                 order_id=order.id,
                 payment_date=datetime.now() - timedelta(days=random.randint(0, 30)),
                 amount=amount,

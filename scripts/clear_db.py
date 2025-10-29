@@ -14,7 +14,7 @@ from sqlalchemy.orm import sessionmaker
 
 from src.config import settings
 from src.database import engine
-from src.models.auth.user import User
+from src.models.auth.user import UserORM
 
 AsyncSessionLocal = sessionmaker(engine, expire_on_commit=False, class_=AsyncSession)
 
@@ -30,11 +30,11 @@ async def clear_tables(session):
     await session.commit()
     print("All tables cleared successfully!")
     result = await session.execute(
-        delete(User).where(User.email == settings.ADMIN_EMAIL)
+        delete(UserORM).where(UserORM.email == settings.ADMIN_EMAIL)
     )
     await session.commit()
 
-    admin = User(
+    admin = UserORM(
         email=settings.ADMIN_EMAIL,
         password_hash=settings.ADMIN_PASS,
         first_name="System",

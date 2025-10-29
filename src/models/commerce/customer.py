@@ -4,7 +4,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from src.database import Base
 
 
-class CustomerOrm(Base):
+class CustomerORM(Base):
     __tablename__ = "customers"
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -13,4 +13,4 @@ class CustomerOrm(Base):
     phone: Mapped[str] = mapped_column(String(20), index=True)
     address: Mapped[str] = mapped_column(String(200))
 
-    orders: Mapped[list["OrderOrm"]] = relationship(back_populates="customer")
+    orders: Mapped[list["OrderORM"]] = relationship(back_populates="customer")

@@ -6,7 +6,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from src.database import Base
 
 
-class OrderOrm(Base):
+class OrderORM(Base):
     __tablename__ = "orders"
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -15,6 +15,6 @@ class OrderOrm(Base):
     status: Mapped[str] = mapped_column(String(50), index=True)
     total_amount: Mapped[float] = mapped_column(DECIMAL(10, 2))
 
-    customer: Mapped["CustomerOrm"] = relationship(back_populates="orders")
+    customer: Mapped["CustomerORM"] = relationship(back_populates="orders")
     order_items: Mapped[list["OrderItemOrm"]] = relationship(back_populates="order")
-    payments: Mapped[list["PaymentOrm"]] = relationship(back_populates="order")
+    payments: Mapped[list["PaymentORM"]] = relationship(back_populates="order")

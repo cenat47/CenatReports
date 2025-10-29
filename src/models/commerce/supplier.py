@@ -5,11 +5,11 @@ from sqlalchemy.orm import (Mapped, declarative_base, mapped_column,
 from src.database import Base
 
 
-class SupplierOrm(Base):
+class SupplierORM(Base):
     __tablename__ = "suppliers"
 
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(100), index=True)
     contact_info: Mapped[str] = mapped_column(String(200), nullable=True, index=True)
 
-    products: Mapped[list["ProductOrm"]] = relationship(back_populates="supplier")
+    products: Mapped[list["ProductORM"]] = relationship(back_populates="supplier")

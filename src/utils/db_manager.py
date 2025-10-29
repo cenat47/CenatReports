@@ -1,4 +1,15 @@
-# from src.repositories.users import UsersRepository
+from src.repositories.auth.refresh_token import RefreshTokenRepository
+from src.repositories.auth.user import UserRepository
+from src.repositories.commerce.category import CategoryRepository
+from src.repositories.commerce.customer import CustomerRepository
+from src.repositories.commerce.supplier import SupplierRepository
+from src.repositories.commerce.order import OrderRepository
+from src.repositories.commerce.order_item import OrderItemRepository
+from src.repositories.commerce.payment import PaymentRepository
+from src.repositories.commerce.product import ProductRepository
+from src.repositories.report.report_task import ReportTaskRepository
+from src.repositories.report.report_template import ReportTemplateRepository
+
 
 
 class DBManager:
@@ -8,7 +19,17 @@ class DBManager:
     async def __aenter__(self):
         self.session = self.session_factory()
 
-        # self.hotels = HotelsRepository(self.session) по образцу добавить репозитории
+        self.refresh_token = RefreshTokenRepository(self.session)
+        self.user = UserRepository(self.session)
+        self.category = CategoryRepository(self.session)
+        self.customer = CustomerRepository(self.session)
+        self.supplier = SupplierRepository(self.session)
+        self.order = OrderRepository(self.session)
+        self.order_item = OrderItemRepository(self.session)
+        self.payment = PaymentRepository(self.session)
+        self.product = ProductRepository(self.session)
+        self.report_task = ReportTaskRepository(self.session)
+        self.report_template = ReportTemplateRepository(self.session)
 
         return self
 

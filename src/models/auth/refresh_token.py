@@ -4,7 +4,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 from src.database import Base
 
 
-class RefreshToken(Base):
+class RefreshTokenORM(Base):
     __tablename__ = "refresh_tokens"
 
     id: Mapped[int] = mapped_column(primary_key=True)
