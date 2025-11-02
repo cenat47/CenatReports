@@ -39,7 +39,7 @@ async def clear_tables(session):
         password_hash=settings.ADMIN_PASS,
         first_name="System",
         last_name="Admin",
-        role="admin",
+        role="superadmin",
         is_active=True,
         registered_at=datetime.utcnow(),
     )

@@ -12,7 +12,7 @@ from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
 
 from src.init import redis_manager
-
+from src.api.auth import router as auth_router 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -26,5 +26,8 @@ async def lifespan(app: FastAPI):
 logging.basicConfig(level=logging.DEBUG)
 
 app = FastAPI(lifespan=lifespan)
+
+app.include_router(auth_router)
+
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)

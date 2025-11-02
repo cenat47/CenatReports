@@ -1,6 +1,6 @@
-from src.repositories.mapper.mappers import OrderDataMapper
 from src.models.commerce.order import OrderORM
 from src.repositories.base import BaseRepository
+from src.repositories.mapper.mappers import OrderDataMapper
 
 
 class OrderRepository(BaseRepository):

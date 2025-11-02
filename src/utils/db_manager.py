@@ -2,14 +2,13 @@ from src.repositories.auth.refresh_token import RefreshTokenRepository
 from src.repositories.auth.user import UserRepository
 from src.repositories.commerce.category import CategoryRepository
 from src.repositories.commerce.customer import CustomerRepository
-from src.repositories.commerce.supplier import SupplierRepository
 from src.repositories.commerce.order import OrderRepository
 from src.repositories.commerce.order_item import OrderItemRepository
 from src.repositories.commerce.payment import PaymentRepository
 from src.repositories.commerce.product import ProductRepository
+from src.repositories.commerce.supplier import SupplierRepository
 from src.repositories.report.report_task import ReportTaskRepository
 from src.repositories.report.report_template import ReportTemplateRepository
-
 
 
 class DBManager:
