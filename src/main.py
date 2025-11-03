@@ -25,7 +25,7 @@ async def lifespan(app: FastAPI):
 
 logging.basicConfig(level=logging.DEBUG)
 
-app = FastAPI(lifespan=lifespan)
+app = FastAPI()
 
 app.include_router(auth_router)
 

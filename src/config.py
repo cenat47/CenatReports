@@ -15,6 +15,7 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int
     JWT_SECRET_KEY: str
     ALGORITHM: str
+    REFRESH_TOKEN_EXPIRE_DAYS: int
 
     REDIS_HOST: str
     REDIS_PORT: int

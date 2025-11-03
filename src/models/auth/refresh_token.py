@@ -8,7 +8,7 @@ from src.database import Base
 
 
 class RefreshTokenORM(Base):
-    __tablename__ = 'refresh_session'
+    __tablename__ = 'refresh_token'
 
     id: Mapped[uuid.UUID] = mapped_column(UUID, primary_key=True, default=uuid.uuid4)
     refresh_token: Mapped[uuid.UUID] = mapped_column(UUID, index=True, unique=True)

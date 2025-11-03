@@ -1,5 +1,5 @@
 import sys
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 project_root = Path(__file__).parent.parent
@@ -41,7 +41,7 @@ async def clear_tables(session):
         last_name="Admin",
         role="superadmin",
         is_active=True,
-        registered_at=datetime.utcnow(),
+        registered_at=datetime.now(timezone.utc),
     )
     session.add(admin)
     await session.commit()

@@ -1,7 +1,8 @@
 from datetime import datetime
 import uuid
-from sqlalchemy import UUID, Boolean, DateTime, String
+from sqlalchemy import UUID, Boolean, DateTime, String, func
 from sqlalchemy.orm import Mapped, mapped_column
+import sqlalchemy as sa
 
 from src.database import Base
 
@@ -20,5 +21,7 @@ class UserORM(Base):
     )  # допустимы: admin, manager, user
 
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
-    registered_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
-    last_login_at: Mapped[datetime | None] = mapped_column(DateTime)
+    registered_at: Mapped[datetime] = mapped_column(sa.TIMESTAMP(timezone=True),
+                                                 server_default=func.now())
+    last_login_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    

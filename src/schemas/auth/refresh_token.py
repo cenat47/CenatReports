@@ -13,3 +13,8 @@ class RefreshTokenAdd(BaseModel):
 class RefreshToken(RefreshTokenAdd):
     id: uuid.UUID
     created_at: datetime
+
+class Token(BaseModel):
+    access_token: str
+    refresh_token: uuid.UUID
+    token_type: str
