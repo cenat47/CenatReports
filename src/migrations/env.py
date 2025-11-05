@@ -7,8 +7,14 @@ from src.config import settings
 from src.database import Base
 from src.models.auth import refresh_token, user
 from src.models.commerce import order  # noqa: F403
-from src.models.commerce import (category, customer, order_item, payment,
-                                 product, supplier)
+from src.models.commerce import (
+    category,
+    customer,
+    order_item,
+    payment,
+    product,
+    supplier,
+)
 from src.models.report import report_task, report_template
 
 # this is the Alembic Config object, which provides

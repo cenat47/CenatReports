@@ -15,6 +15,7 @@ from sqlalchemy.orm import sessionmaker
 from src.config import settings
 from src.database import engine
 from src.models.auth.user import UserORM
+from src.utils.password_utils import get_password_hash
 
 AsyncSessionLocal = sessionmaker(engine, expire_on_commit=False, class_=AsyncSession)
 
@@ -27,21 +28,25 @@ async def clear_tables(session):
     await session.execute(text("DELETE FROM customers"))
     await session.execute(text("DELETE FROM suppliers"))
     await session.execute(text("DELETE FROM categories"))
+    await session.execute(text("DELETE FROM users"))
+    await session.execute(text("DELETE FROM refresh_token"))
+
     await session.commit()
     print("All tables cleared successfully!")
     result = await session.execute(
         delete(UserORM).where(UserORM.email == settings.ADMIN_EMAIL)
     )
     await session.commit()
-
+    password_hash = get_password_hash(settings.ADMIN_PASS)
     admin = UserORM(
         email=settings.ADMIN_EMAIL,
-        password_hash=settings.ADMIN_PASS,
+        password_hash=password_hash,
         first_name="System",
         last_name="Admin",
         role="superadmin",
         is_active=True,
         registered_at=datetime.now(timezone.utc),
+        is_verified=True,
     )
     session.add(admin)
     await session.commit()

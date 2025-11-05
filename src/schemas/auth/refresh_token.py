@@ -1,6 +1,7 @@
-from datetime import datetime
 import uuid
-from pydantic import BaseModel, Field
+from datetime import datetime
+
+from pydantic import BaseModel
 
 
 class RefreshTokenAdd(BaseModel):
@@ -13,6 +14,7 @@ class RefreshTokenAdd(BaseModel):
 class RefreshToken(RefreshTokenAdd):
     id: uuid.UUID
     created_at: datetime
+
 
 class Token(BaseModel):
     access_token: str

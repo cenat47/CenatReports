@@ -1,6 +1,15 @@
-from datetime import datetime
 import uuid
-from pydantic import BaseModel, Field, EmailStr
+from datetime import datetime, timezone
+from enum import Enum
+
+from pydantic import BaseModel, EmailStr, Field
+
+
+class UserRole(str, Enum):
+    user = "user"
+    manager = "manager"
+    admin = "admin"
+    superadmin = "superadmin"
 
 
 class UserRequest(BaseModel):
@@ -8,6 +17,20 @@ class UserRequest(BaseModel):
     password: str = Field(min_length=1, max_length=75)
     first_name: str | None = Field(default=None, max_length=50)
     last_name: str | None = Field(default=None, max_length=50)
+
+
+class UserVerify(BaseModel):
+    email: EmailStr = Field(max_length=100)
+    code: str = Field(pattern=r"^\d{6}$")
+
+
+class UserReverify(BaseModel):
+    email: EmailStr
+
+
+class VerifyStatus(BaseModel):
+    is_verified: bool = False
+
 
 class UserLogin(BaseModel):
     email: EmailStr = Field(max_length=100)
@@ -19,13 +42,16 @@ class UserAdd(BaseModel):
     password_hash: str
     first_name: str | None
     last_name: str | None
-    role: str = "user"
+    role: UserRole = UserRole.user
     is_active: bool = True
-    registered_at: datetime = Field(default_factory=datetime.utcnow)
+    is_verified: bool = False
+    registered_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     last_login_at: datetime | None = None
+
 
 class LastLoginUpdate(BaseModel):
     last_login_at: datetime
+
 
 class User(UserAdd):
     id: uuid.UUID
