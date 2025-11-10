@@ -1,7 +1,7 @@
 from email.message import EmailMessage
 from jinja2 import Environment, FileSystemLoader, select_autoescape
-from aiosmtplib import send
-from config import settings
+import smtplib
+from src.config import settings
 from pathlib import Path
 
 TEMPLATES_DIR = Path(__file__).parent.parent / "templates" / "email"
@@ -11,7 +11,7 @@ env = Environment(
 )
 
 
-async def send_verification_email(to_email: str, code: str):
+def send_verification_email(to_email: str, code: str):
     template = env.get_template("verification.html")
     html_content = template.render(code=code)
 
@@ -21,11 +21,6 @@ async def send_verification_email(to_email: str, code: str):
     message["Subject"] = "Подтверждение регистрации"
     message.set_content(html_content, subtype="html")
 
-    await send(
-        message,
-        hostname=settings.SMTP_HOST,
-        port=settings.SMTP_PORT,
-        username=settings.SMTP_USER,
-        password=settings.SMTP_PASS,
-        start_tls=True,
-    )
+    with smtplib.SMTP_SSL(settings.SMTP_HOST, settings.SMTP_PORT) as smtp:
+        smtp.login(settings.SMTP_USER, settings.SMTP_PASS)
+        smtp.send_message(message)

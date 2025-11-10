@@ -22,3 +22,4 @@ services:
       - "${REDIS_PORT}:6379"  
     volumes:
       - //d/docker_data/cenat_redis:/data
+

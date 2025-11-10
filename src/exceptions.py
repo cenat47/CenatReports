@@ -51,12 +51,7 @@ class UserNotActiveException(MainException):
 
 class InvalidVerificationCodeException(MainException):
     status_code = status.HTTP_400_BAD_REQUEST
-    detail = "Неверный код подтверждения"
-
-
-class ExpiredVerificationCodeException(MainException):
-    status_code = status.HTTP_400_BAD_REQUEST
-    detail = "Код подтверждения просрочен"
+    detail = "Некорректный код подтверждения"
 
 
 class EmailNotVerifiedException(MainException):

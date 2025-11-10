@@ -7,7 +7,6 @@ from jose import jwt
 from src.config import settings
 from src.exceptions import (
     ExpiredTokenException,
-    ExpiredVerificationCodeException,
     InvalidTokenException,
     InvalidVerificationCodeException,
     ObjectAlreadyExistsException,
@@ -27,7 +26,7 @@ from src.schemas.auth.user import (
 )
 from src.services.base import BaseService
 from src.utils.password_utils import get_password_hash, is_valid_password
-from utils.email_sender import send_verification_email
+from src.tasks.tasks import send_verification_email_task
 
 
 class UserService(BaseService):
@@ -43,23 +42,20 @@ class UserService(BaseService):
         )
         try:
             db_user = await self.db.user.add(useradd)
+            await self.db.commit()
         except ObjectAlreadyExistsException:
             raise UserAlreadyExistsException()
         code = f"{random.randint(0, 999999):06d}"
         redis_key = f"email_verification:{user.email}"
         await redis_manager.set(key=redis_key, value=code, expire=600)
-        try:
-            await send_verification_email(user.email, code)
-        except Exception as e:
-            logging.error(f"Ошибка отправки письма: {e}")
-        await self.db.commit()
+        send_verification_email_task.delay(user.email, code)
         return db_user
 
     async def verify_user(self, data: UserVerify) -> str:
         key = f"email_verification:{data.email}"
         code = await redis_manager.get(key)
         if not code:
-            raise ExpiredVerificationCodeException
+            raise InvalidVerificationCodeException
         if code != data.code:
             raise InvalidVerificationCodeException
         await self.db.user.edit(data=VerifyStatus(is_verified=True), email=data.email)
