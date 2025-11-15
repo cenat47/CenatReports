@@ -19,19 +19,31 @@ depends_on: Union[str, Sequence[str], None] = None
 def upgrade() -> None:
     """Create materialized view mv_sales_daily"""
     op.execute("""
-    CREATE MATERIALIZED VIEW mv_sales_daily AS
+        CREATE MATERIALIZED VIEW mv_sales_daily AS
+    WITH payments_agg AS (
+        SELECT order_id, SUM(amount) AS total_payments
+        FROM payments
+        GROUP BY order_id
+    ),
+    items_agg AS (
+        SELECT order_id,
+            SUM(quantity) AS total_items
+        FROM order_items
+        GROUP BY order_id
+    )
     SELECT
         o.order_date::date AS date,
-        COUNT(DISTINCT o.id) AS total_orders,
+        COUNT(*) AS total_orders,
         SUM(o.total_amount) AS total_amount,
         AVG(o.total_amount) AS avg_check,
-        SUM(oi.quantity) AS total_items,
-        COALESCE(SUM(p.amount), 0) AS total_payments
+        SUM(COALESCE(i.total_items, 0)) AS total_items,
+        SUM(COALESCE(p.total_payments, 0)) AS total_payments
     FROM orders o
-    LEFT JOIN order_items oi ON oi.order_id = o.id
-    LEFT JOIN payments p ON p.order_id = o.id
+    LEFT JOIN items_agg i ON i.order_id = o.id
+    LEFT JOIN payments_agg p ON p.order_id = o.id
     GROUP BY o.order_date::date
     ORDER BY o.order_date::date;
+
     """)
 
 

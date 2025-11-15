@@ -20,6 +20,11 @@ def upgrade() -> None:
     """Create materialized view mv_sales_by_product"""
     op.execute("""
     CREATE MATERIALIZED VIEW mv_sales_by_product AS
+    WITH payments_agg AS (
+        SELECT order_id, SUM(amount) AS total_payments
+        FROM payments
+        GROUP BY order_id
+    )
     SELECT
         p.id AS product_id,
         p.name AS product_name,
@@ -27,14 +32,15 @@ def upgrade() -> None:
         SUM(oi.quantity) AS total_quantity,
         SUM(oi.total_cost) AS total_amount,
         COUNT(DISTINCT o.id) AS total_orders,
-        COALESCE(SUM(pay.amount), 0) AS total_payments
+        SUM(COALESCE(pay.total_payments, 0)) AS total_payments
     FROM products p
     LEFT JOIN order_items oi ON oi.product_id = p.id
     LEFT JOIN orders o ON o.id = oi.order_id
-    LEFT JOIN payments pay ON pay.order_id = o.id
+    LEFT JOIN payments_agg pay ON pay.order_id = o.id
     LEFT JOIN categories c ON c.id = p.category_id
     GROUP BY p.id, p.name, c.name
     ORDER BY total_amount DESC;
+
     """)
 
 

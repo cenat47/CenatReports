@@ -39,7 +39,7 @@ async def generate_report(
     )
 
 
-@router.get("/report/status/{task_id}", response_model=ReportTaskStatus)
+@router.get("/status/{task_id}", response_model=ReportTaskStatus)
 async def get_report_status(
     task_id: uuid.UUID, db: DBDep, current_user: get_current_active_user_Dep
 ):
@@ -66,7 +66,7 @@ async def get_report_status(
     )
 
 
-@router.get("/report/download/{task_id}")
+@router.get("/download/{task_id}")
 async def download_report(
     task_id: uuid.UUID, db: DBDep, current_user: get_current_active_user_Dep
 ):

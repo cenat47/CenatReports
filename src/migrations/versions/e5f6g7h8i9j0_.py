@@ -19,16 +19,14 @@ depends_on: Union[str, Sequence[str], None] = None
 def upgrade() -> None:
     """Create materialized view mv_payments_by_method"""
     op.execute("""
-    CREATE MATERIALIZED VIEW mv_payments_by_method AS
+        CREATE MATERIALIZED VIEW mv_payments_by_method AS
     SELECT
         pay.method AS payment_method,
-        COUNT(DISTINCT o.id) AS total_orders,
-        SUM(oi.quantity) AS total_quantity,
-        SUM(oi.total_cost) AS total_amount,
-        SUM(pay.amount) AS total_payments
+        COUNT(*) AS payments_count,
+        COUNT(DISTINCT pay.order_id) AS total_orders,
+        SUM(pay.amount) AS total_payments,
+        AVG(pay.amount) AS avg_payment
     FROM payments pay
-    LEFT JOIN orders o ON o.id = pay.order_id
-    LEFT JOIN order_items oi ON oi.order_id = o.id
     GROUP BY pay.method
     ORDER BY total_payments DESC;
     """)
