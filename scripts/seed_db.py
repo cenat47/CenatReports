@@ -1,6 +1,8 @@
 import sys
 from pathlib import Path
 
+from src.models.report.report_template import ReportTemplateORM
+
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
@@ -258,6 +260,23 @@ async def create_payments(session, orders):
 
 
 # --------------------------------------------
+# Создание шаблонов отчетов
+# --------------------------------------------
+
+
+async def create_report_templates(session):
+    # Создаем шаблон отчета daily_sales
+    template = ReportTemplateORM(
+        name="daily_sales",
+        description="Ежедневный отчет по продажам. Показывает общую выручку, средний чек, количество заказов и другие метрики по дням. Пользователь вводит начальную и конечную даты для анализа.",
+        allowed_roles="manager",
+    )
+    session.add(template)
+    await session.commit()
+    return [template]
+
+
+# --------------------------------------------
 # MAIN
 # --------------------------------------------
 
@@ -270,6 +289,7 @@ async def main():
         customers = await create_customers(session)
         orders = await create_orders(session, customers, products)
         await create_payments(session, orders)
+        await create_report_templates(session)
 
         print("✅ База данных успешно заполнена!")
 

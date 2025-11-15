@@ -1,7 +1,8 @@
 from datetime import datetime
+import uuid
 
 import sqlalchemy as sa
-from sqlalchemy import ForeignKey, String, Text, func
+from sqlalchemy import ForeignKey, String, Text, func, UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
 from src.database import Base
@@ -9,9 +10,9 @@ from src.database import Base
 
 class ReportTaskORM(Base):
     __tablename__ = "report_tasks"
+    id: Mapped[uuid.UUID] = mapped_column(UUID, primary_key=True, default=uuid.uuid4)
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    user_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey("users.id"))
     template_id: Mapped[int] = mapped_column(ForeignKey("report_templates.id"))
 
     status: Mapped[str] = mapped_column(

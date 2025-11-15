@@ -133,7 +133,7 @@ def upgrade() -> None:
     )
     op.create_table(
         "report_tasks",
-        sa.Column("id", sa.Integer(), nullable=False),
+        sa.Column("id", sa.UUID(), nullable=False),
         sa.Column("user_id", sa.UUID(), nullable=False),
         sa.Column("template_id", sa.Integer(), nullable=False),
         sa.Column("status", sa.String(length=50), nullable=False),

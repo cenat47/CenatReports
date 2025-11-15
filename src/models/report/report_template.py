@@ -11,4 +11,3 @@ class ReportTemplateORM(Base):
     name: Mapped[str] = mapped_column(String(100), nullable=False)
     description: Mapped[str | None] = mapped_column(Text)
     allowed_roles: Mapped[str | None] = mapped_column(String(200))
-    query: Mapped[str | None] = mapped_column(Text)

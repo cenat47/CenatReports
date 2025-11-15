@@ -1,3 +1,4 @@
+from src.repositories.report.sales_daily import SalesDailyRepository
 from src.repositories.auth.refresh_token import RefreshTokenRepository
 from src.repositories.auth.user import UserRepository
 from src.repositories.commerce.category import CategoryRepository
@@ -29,6 +30,7 @@ class DBManager:
         self.product = ProductRepository(self.session)
         self.report_task = ReportTaskRepository(self.session)
         self.report_template = ReportTemplateRepository(self.session)
+        self.sales_daily = SalesDailyRepository(self.session)
 
         return self
 

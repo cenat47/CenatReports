@@ -1,3 +1,5 @@
+from src.models.report.sales_daily import SalesDailyORM
+from src.schemas.report.sales_daily import SalesDaily, SalesSummary
 from src.models.auth.refresh_token import RefreshTokenORM
 from src.models.auth.user import UserORM
 from src.models.commerce.category import CategoryORM
@@ -76,3 +78,8 @@ class ReportTemplateDataMapper(DataMapper):
 class ReportTaskDataMapper(DataMapper):
     db_model = ReportTaskORM
     schema = ReportTask
+
+
+class SalesDailyDataMapper(DataMapper):
+    db_model = SalesDailyORM
+    schema = SalesDaily

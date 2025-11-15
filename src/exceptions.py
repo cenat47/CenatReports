@@ -44,6 +44,11 @@ class UserNotFoundException(MainException):
     detail = "User not found"
 
 
+class ReportIsNotReady(MainException):
+    status_code = status.HTTP_400_BAD_REQUEST
+    detail = "Отчет еще не готов"
+
+
 class UserNotActiveException(MainException):
     status_code = status.HTTP_403_FORBIDDEN
     detail = "User is not active"

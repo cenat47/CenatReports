@@ -52,26 +52,26 @@ async def check_active(user: User):
 
 
 async def get_current_active_user(current_user: User = Depends(get_current_user)):
-    check_active(current_user)
+    await check_active(current_user)
     return current_user
 
 
 async def get_current_active_manager(current_user: str = Depends(get_current_user)):
-    check_active(current_user)
+    await check_active(current_user)
     if current_user.role == UserRole.user:
         raise PermissionDeniedException
     return current_user
 
 
 async def get_current_active_admin(current_user: str = Depends(get_current_user)):
-    check_active(current_user)
+    await check_active(current_user)
     if current_user.role in [UserRole.user, UserRole.manager]:
         raise PermissionDeniedException
     return current_user
 
 
 async def get_current_active_superadmin(current_user: str = Depends(get_current_user)):
-    check_active(current_user)
+    await check_active(current_user)
     if current_user.role != UserRole.superadmin:
         raise PermissionDeniedException
     return current_user
