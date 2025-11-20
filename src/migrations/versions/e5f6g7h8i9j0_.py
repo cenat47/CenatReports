@@ -7,7 +7,6 @@ Create Date: 2025-11-08 22:30:00.000000
 
 from typing import Sequence, Union
 from alembic import op
-import sqlalchemy as sa
 
 # revision identifiers
 revision: str = "e5f6g7h8i9j0"
@@ -19,16 +18,19 @@ depends_on: Union[str, Sequence[str], None] = None
 def upgrade() -> None:
     """Create materialized view mv_payments_by_method"""
     op.execute("""
-        CREATE MATERIALIZED VIEW mv_payments_by_method AS
+    CREATE MATERIALIZED VIEW mv_payments_by_method_daily AS
     SELECT
-        pay.method AS payment_method,
-        COUNT(*) AS payments_count,
-        COUNT(DISTINCT pay.order_id) AS total_orders,
-        SUM(pay.amount) AS total_payments,
-        AVG(pay.amount) AS avg_payment
-    FROM payments pay
-    GROUP BY pay.method
-    ORDER BY total_payments DESC;
+        p.payment_date::date AS payment_date,
+        p.method AS payment_method,
+        COUNT(DISTINCT o.id) AS total_orders,
+        SUM(oi.quantity) AS total_quantity,
+        SUM(oi.total_cost) AS total_amount,
+        SUM(p.amount) AS total_payments
+    FROM payments p
+    JOIN orders o ON o.id = p.order_id
+    JOIN order_items oi ON oi.order_id = o.id
+    GROUP BY p.payment_date::date, p.method;
+
     """)
 
 

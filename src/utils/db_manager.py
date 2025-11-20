@@ -1,3 +1,5 @@
+from src.repositories.report.payments_by_method import PaymentsRepository
+from src.repositories.report.sales_by_customer import SalesByCustomerRepository
 from src.repositories.report.sales_daily import SalesDailyRepository
 from src.repositories.auth.refresh_token import RefreshTokenRepository
 from src.repositories.auth.user import UserRepository
@@ -10,6 +12,9 @@ from src.repositories.commerce.product import ProductRepository
 from src.repositories.commerce.supplier import SupplierRepository
 from src.repositories.report.report_task import ReportTaskRepository
 from src.repositories.report.report_template import ReportTemplateRepository
+from src.repositories.report.sales_by_product_category_daily import (
+    SalesByProductCategoryDailyRepository,
+)
 
 
 class DBManager:
@@ -31,6 +36,11 @@ class DBManager:
         self.report_task = ReportTaskRepository(self.session)
         self.report_template = ReportTemplateRepository(self.session)
         self.sales_daily = SalesDailyRepository(self.session)
+        self.payments = PaymentsRepository(self.session)
+        self.product_category_daily = SalesByProductCategoryDailyRepository(
+            self.session
+        )
+        self.sales_by_customer_daily = SalesByCustomerRepository(self.session)
 
         return self
 

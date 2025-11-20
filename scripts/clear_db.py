@@ -22,6 +22,7 @@ AsyncSessionLocal = sessionmaker(engine, expire_on_commit=False, class_=AsyncSes
 
 async def clear_tables(session):
     await session.execute(text("DELETE FROM payments"))
+    await session.execute(text("DELETE FROM report_tasks"))
     await session.execute(text("DELETE FROM order_items"))
     await session.execute(text("DELETE FROM orders"))
     await session.execute(text("DELETE FROM products"))
@@ -30,6 +31,7 @@ async def clear_tables(session):
     await session.execute(text("DELETE FROM categories"))
     await session.execute(text("DELETE FROM users"))
     await session.execute(text("DELETE FROM refresh_token"))
+    await session.execute(text("DELETE FROM report_templates"))
 
     await session.commit()
     print("All tables cleared successfully!")

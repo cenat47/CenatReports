@@ -1,4 +1,3 @@
-import logging
 import random
 import uuid
 from datetime import datetime, timedelta, timezone

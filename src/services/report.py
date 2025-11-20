@@ -1,6 +1,5 @@
 import json
 from schemas.report.report_task import ReportTaskAdd, Status
-from src.schemas.report.sales_daily import SalesDailyParams
 from src.services.base import BaseService
 from src.tasks.tasks import make_report
 

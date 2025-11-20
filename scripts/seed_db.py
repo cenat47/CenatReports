@@ -1,7 +1,6 @@
 import sys
 from pathlib import Path
 
-from src.models.report.report_template import ReportTemplateORM
 
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
@@ -21,6 +20,8 @@ from src.models.commerce.order import OrderORM
 from src.models.commerce.order_item import OrderItemOrm
 from src.models.commerce.payment import PaymentORM
 from src.models.commerce.product import ProductORM
+from src.models.report.report_template import ReportTemplateORM
+
 from src.models.commerce.supplier import SupplierORM
 
 fake = Faker("ru_RU")
@@ -265,15 +266,53 @@ async def create_payments(session, orders):
 
 
 async def create_report_templates(session):
-    # Создаем шаблон отчета daily_sales
-    template = ReportTemplateORM(
-        name="daily_sales",
-        description="Ежедневный отчет по продажам. Показывает общую выручку, средний чек, количество заказов и другие метрики по дням. Пользователь вводит начальную и конечную даты для анализа.",
-        allowed_roles="manager",
-    )
-    session.add(template)
+    templates = []
+
+    reports = [
+        (
+            "daily_sales",
+            "Ежедневный отчёт по продажам. Пользователь вводит начальную и конечную даты. Отчёт показывает суммарную выручку, количество заказов, средний чек и другие метрики по каждому дню в указанном диапазоне.",
+        ),
+        (
+            "sales_by_categories",
+            "Отчёт по продажам по категориям товаров. Пользователь вводит период (начальная/конечная дата) и при желании выбирает конкретную категорию. Отчёт выводит общее количество продаж, сумму, средний чек и другие метрики по категориям.",
+        ),
+        (
+            "sales_by_products",
+            "Отчёт по продажам отдельных продуктов. Пользователь вводит период (начальная/конечная дата) и может выбрать конкретный продукт. Выводится количество проданных единиц, сумма, средняя цена и общие метрики по каждому продукту.",
+        ),
+        (
+            "customers",
+            "Отчёт по клиентам за период. Пользователь вводит начальную и конечную даты, а также выбирает режим: показать всех клиентов или только топ клиентов по сумме покупок. Метрики: общее количество заказов, сумма покупок, средний чек, активность клиентов.",
+        ),
+        (
+            "payments",
+            "Отчёт по платежам за период. Пользователь вводит начальную и конечную даты и выбирает режим: все платежи или топ по сумме. Метрики: общая сумма платежей, количество транзакций, средний платёж, распределение по способам оплаты.",
+        ),
+    ]
+
+    for name, description in reports:
+        # --- Основной отчёт ---
+        report = ReportTemplateORM(
+            name=name,
+            description=description,
+            allowed_roles="manager",
+        )
+        templates.append(report)
+
+        # --- Summary отчёт ---
+        report_summary = ReportTemplateORM(
+            name=f"{name}_summary",
+            description=f"Агрегированный отчёт за период для '{name}'. Показывает итоговые показатели: общие суммы, средние значения и другие метрики за выбранный промежуток.",
+            allowed_roles="manager",
+        )
+        templates.append(report_summary)
+
+    # --- Сохраняем в БД ---
+    session.add_all(templates)
     await session.commit()
-    return [template]
+
+    return templates
 
 
 # --------------------------------------------

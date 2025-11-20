@@ -7,7 +7,6 @@ Create Date: 2025-11-08 22:00:00.000000
 
 from typing import Sequence, Union
 from alembic import op
-import sqlalchemy as sa
 
 # revision identifiers
 revision: str = "d4e5f6g7h8i9"
@@ -19,26 +18,22 @@ depends_on: Union[str, Sequence[str], None] = None
 def upgrade() -> None:
     """Create materialized view mv_sales_by_customer"""
     op.execute("""
-    CREATE MATERIALIZED VIEW mv_sales_by_customer AS
-    WITH payments_agg AS (
-        SELECT order_id, SUM(amount) AS total_payments
-        FROM payments
-        GROUP BY order_id
-    )
+    CREATE MATERIALIZED VIEW mv_sales_by_customer_daily AS
     SELECT
+        o.order_date::date AS order_date,
         cu.id AS customer_id,
         cu.name AS customer_name,
         cu.email AS customer_email,
         SUM(oi.quantity) AS total_quantity,
         SUM(oi.total_cost) AS total_amount,
         COUNT(DISTINCT o.id) AS total_orders,
-        SUM(COALESCE(pay.total_payments, 0)) AS total_payments
-    FROM customers cu
-    LEFT JOIN orders o ON o.customer_id = cu.id
-    LEFT JOIN order_items oi ON oi.order_id = o.id
-    LEFT JOIN payments_agg pay ON pay.order_id = o.id
-    GROUP BY cu.id, cu.name, cu.email
-    ORDER BY total_amount DESC;
+        COALESCE(SUM(pay.amount), 0) AS total_payments
+    FROM orders o
+    JOIN customers cu ON o.customer_id = cu.id
+    JOIN order_items oi ON oi.order_id = o.id
+    LEFT JOIN payments pay ON pay.order_id = o.id
+    GROUP BY o.order_date::date, cu.id, cu.name, cu.email;
+
     """)
 
 

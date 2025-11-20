@@ -1,5 +1,12 @@
+from src.models.report.sales_by_customer import SalesByCustomerDailyORM
+from src.repositories.report.sales_by_customer import SalesByCustomerDaily
+from src.schemas.report.sales_by_product_category_daily import SalesByCategoryDaily
+from src.models.report.sales_by_product_category_daily import (
+    SalesByProductCategoryDailyORM,
+)
+
 from src.models.report.sales_daily import SalesDailyORM
-from src.schemas.report.sales_daily import SalesDaily, SalesSummary
+from src.schemas.report.sales_daily import SalesDaily
 from src.models.auth.refresh_token import RefreshTokenORM
 from src.models.auth.user import UserORM
 from src.models.commerce.category import CategoryORM
@@ -83,3 +90,13 @@ class ReportTaskDataMapper(DataMapper):
 class SalesDailyDataMapper(DataMapper):
     db_model = SalesDailyORM
     schema = SalesDaily
+
+
+class SalesByProductCategoryDailyDataMapper(DataMapper):
+    db_model = SalesByProductCategoryDailyORM
+    schema = SalesByCategoryDaily
+
+
+class SalesByCustomerDailyDataMapper(DataMapper):
+    db_model = SalesByCustomerDailyORM
+    schema = SalesByCustomerDaily

@@ -7,7 +7,6 @@ Create Date: 2025-11-08 21:00:00.000000
 
 from typing import Sequence, Union
 from alembic import op
-import sqlalchemy as sa
 
 # revision identifiers
 revision: str = "b2c3d4e5f6g7"
@@ -17,29 +16,26 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    """Create materialized view mv_sales_by_product"""
+    """Create materialized view mv_sales_by_product_category_daily"""
     op.execute("""
-    CREATE MATERIALIZED VIEW mv_sales_by_product AS
-    WITH payments_agg AS (
-        SELECT order_id, SUM(amount) AS total_payments
-        FROM payments
-        GROUP BY order_id
-    )
+    CREATE MATERIALIZED VIEW mv_sales_by_product_category_daily AS
     SELECT
+        o.order_date::date AS order_date,
         p.id AS product_id,
         p.name AS product_name,
+        c.id AS category_id,
         c.name AS category_name,
         SUM(oi.quantity) AS total_quantity,
         SUM(oi.total_cost) AS total_amount,
         COUNT(DISTINCT o.id) AS total_orders,
-        SUM(COALESCE(pay.total_payments, 0)) AS total_payments
-    FROM products p
-    LEFT JOIN order_items oi ON oi.product_id = p.id
-    LEFT JOIN orders o ON o.id = oi.order_id
-    LEFT JOIN payments_agg pay ON pay.order_id = o.id
-    LEFT JOIN categories c ON c.id = p.category_id
-    GROUP BY p.id, p.name, c.name
-    ORDER BY total_amount DESC;
+        COALESCE(SUM(pay.amount), 0) AS total_payments
+    FROM order_items oi
+    JOIN products p ON oi.product_id = p.id
+    JOIN categories c ON p.category_id = c.id
+    JOIN orders o ON oi.order_id = o.id
+    LEFT JOIN payments pay ON pay.order_id = o.id
+    GROUP BY o.order_date::date, p.id, p.name, c.id, c.name;
+
 
     """)
 
