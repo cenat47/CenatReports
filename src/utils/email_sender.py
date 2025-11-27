@@ -24,3 +24,18 @@ def send_verification_email(to_email: str, code: str):
     with smtplib.SMTP_SSL(settings.SMTP_HOST, settings.SMTP_PORT) as smtp:
         smtp.login(settings.SMTP_USER, settings.SMTP_PASS)
         smtp.send_message(message)
+
+def send_report_ready_email(to_email: str, report_name: str, report_link: str):
+    template = env.get_template("report_ready.html")
+    html_content = template.render(report_name=report_name, report_link=report_link)
+
+    message = EmailMessage()
+    message["From"] = settings.SMTP_USER
+    message["To"] = to_email
+    message["Subject"] = f"Отчет '{report_name}' готов"
+    message.set_content(html_content, subtype="html")
+
+    with smtplib.SMTP_SSL(settings.SMTP_HOST, settings.SMTP_PORT) as smtp:
+        smtp.login(settings.SMTP_USER, settings.SMTP_PASS)
+        smtp.send_message(message)
+

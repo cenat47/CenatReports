@@ -14,13 +14,13 @@ from src.schemas.report.report_task import ReportTaskReady, Status
 from src.schemas.report.sales_daily import SalesDailyParams
 from src.utils.db_manager import DBManager
 from src.database import async_session_maker_null_pооl
+from src.tasks.email_tasks import send_report_ready_email_task
 
 
 class ReportService:
     def __init__(self, db: DBManager):
         self.db = db
 
-        # Конфигурация отчетов
         self.report_config = {
             "daily_sales": {
                 "param_model": SalesDailyParams,
@@ -137,6 +137,16 @@ class ReportService:
                 ReportTaskReady(status=Status.ready, result_file=file_path), id=task_id
             )
             await self.db.commit()
+        task = await self.db.report_task.get_one_or_none(id=task_id)
+        report_link = f"http://127.0.0.1:8000/report/download/{task_id}"
+        if task:
+            user = await self.db.user.get_one_or_none(id=task.user_id)
+            if user and user.email:
+                send_report_ready_email_task.delay(
+                    to_email=user.email,
+                    report_name=report_name,
+                    report_link=report_link  
+                )
 
     async def make_report_h(self, task_id: str):
         """Основной метод обработки задачи отчета"""

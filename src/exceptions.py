@@ -12,8 +12,12 @@ class MainException(HTTPException):
 class ObjectIsNotExistsException(MainException):
     status_code = status.HTTP_404_NOT_FOUND
     detail = "Обьект не найден"
-
-
+class TempelateIsNotExistsException(MainException):
+    status_code = status.HTTP_404_NOT_FOUND
+    detail = "Шаблон не найден"
+class  ReportParametersValidationHTTPException(MainException):
+    status_code = status.HTTP_422_UNPROCESSABLE_CONTENT
+    detail = "Параметры не валидны"
 class UserAlreadyExistsException(MainException):
     status_code = status.HTTP_409_CONFLICT
     detail = "Пользователь с данным email существует"
@@ -73,4 +77,7 @@ class AppException(Exception):
 class ObjectAlreadyExistsException(AppException):
     """Вызывается, когда объект уже существует."""
 
+    pass
+class ReportParametersValidationException(AppException):
+    """Вызывается, когда параметры отчёта не проходят валидацию."""
     pass

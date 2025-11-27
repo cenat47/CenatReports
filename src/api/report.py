@@ -7,9 +7,12 @@ from exceptions import (
     ObjectIsNotExistsException,
     PermissionDeniedException,
     ReportIsNotReady,
+    ReportParametersValidationException,
+    ReportParametersValidationHTTPException,
+    TempelateIsNotExistsException,
 )
 from schemas.report.report_task import ReportRequest, ReportTaskStatus
-from services.report import ReportService
+from services.report import ReportServiceS
 from src.api.dependencies import (
     get_current_active_manager_Dep,
     get_current_active_user_Dep,
@@ -167,9 +170,14 @@ async def generate_report(
         }
     ),
 ):
-    return await ReportService(db).generate_report_task(
-        user_id=user.id, report_name=request.report_name, parameters=request.parameters
-    )
+    try:
+        return await ReportServiceS(db).generate_report_task(
+            user_id=user.id, report_name=request.report_name, parameters=request.parameters
+        )
+    except ValueError:
+        raise TempelateIsNotExistsException
+    except ReportParametersValidationException:
+        raise ReportParametersValidationHTTPException
 
 
 @router.get("/status/{task_id}", response_model=ReportTaskStatus)

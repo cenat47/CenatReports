@@ -25,7 +25,7 @@ from src.schemas.auth.user import (
 )
 from src.services.base import BaseService
 from src.utils.password_utils import get_password_hash, is_valid_password
-from src.tasks.tasks import send_verification_email_task
+from src.tasks.email_tasks import send_verification_email_task
 
 
 class UserService(BaseService):
