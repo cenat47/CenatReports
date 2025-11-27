@@ -6,6 +6,6 @@ celery_app = Celery(
     broker=settings.REDIS_URL,
     backend=settings.REDIS_URL,
     include=[
-        "src.tasks.tasks",
+        "src.tasks.tasks","src.tasks.email_tasks",
     ],
 )
