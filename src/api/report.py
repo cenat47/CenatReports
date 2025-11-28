@@ -172,7 +172,9 @@ async def generate_report(
 ):
     try:
         return await ReportServiceS(db).generate_report_task(
-            user_id=user.id, report_name=request.report_name, parameters=request.parameters
+            user_id=user.id,
+            report_name=request.report_name,
+            parameters=request.parameters,
         )
     except ValueError:
         raise TempelateIsNotExistsException

@@ -23,48 +23,48 @@ services:
     volumes:
       - //d/docker_data/cenat_redis:/data
 
-  app:
-    build: .
-    container_name: reports_app
-    environment:
-      - DB_HOST=postgres
-      - DB_NAME=${DB_NAME}
-      - DB_USER=${DB_USER}
-      - DB_PASS=${DB_PASS}
-      - REDIS_HOST=redis
-      - REDIS_PASS=${REDIS_PASS}
-    volumes:
-      - ./reports:/app/report
-    ports:
-      - "8000:8000"
-    depends_on:
-      - postgres
-      - redis
+  # app:
+  #   build: .
+  #   container_name: reports_app
+  #   environment:
+  #     - DB_HOST=postgres
+  #     - DB_NAME=${DB_NAME}
+  #     - DB_USER=${DB_USER}
+  #     - DB_PASS=${DB_PASS}
+  #     - REDIS_HOST=redis
+  #     - REDIS_PASS=${REDIS_PASS}
+  #   volumes:
+  #     - ./reports:/app/report
+  #   ports:
+  #     - "8000:8000"
+  #   depends_on:
+  #     - postgres
+  #     - redis
 
-  celery:
-    build: .
-    container_name: reports_celery
-    command: "celery --app=src.tasks.celery_app:celery_app worker -l INFO"
-    environment:
-      - DB_HOST=postgres
-      - DB_NAME=${DB_NAME}
-      - DB_USER=${DB_USER}
-      - DB_PASS=${DB_PASS}
-      - REDIS_HOST=redis
-      - REDIS_PASS=${REDIS_PASS}
-    volumes:
-      - ./reports:/app/report
-    depends_on:
-      - redis
-      - postgres
+  # celery:
+  #   build: .
+  #   container_name: reports_celery
+  #   command: "celery --app=src.tasks.celery_app:celery_app worker -l INFO"
+  #   environment:
+  #     - DB_HOST=postgres
+  #     - DB_NAME=${DB_NAME}
+  #     - DB_USER=${DB_USER}
+  #     - DB_PASS=${DB_PASS}
+  #     - REDIS_HOST=redis
+  #     - REDIS_PASS=${REDIS_PASS}
+  #   volumes:
+  #     - ./reports:/app/report
+  #   depends_on:
+  #     - redis
+  #     - postgres
 
-  celery_beat_service:
-    container_name: 'celery_beat'
-    build:
-      context: .
-    volumes:
-    - ./reports:/app/report
-    env_file:
-      - .env
-    command: "celery --app=src.tasks.celery_app:celery_app beat -l INFO"
+  # celery_beat_service:
+  #   container_name: 'celery_beat'
+  #   build:
+  #     context: .
+  #   volumes:
+  #   - ./reports:/app/report
+  #   env_file:
+  #     - .env
+  #   command: "celery --app=src.tasks.celery_app:celery_app beat -l INFO"
 

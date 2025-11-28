@@ -55,3 +55,15 @@ class LastLoginUpdate(BaseModel):
 
 class User(UserAdd):
     id: uuid.UUID
+class UserRoleUpdate(BaseModel):
+    email: EmailStr
+    new_role: UserRole
+
+class UserRoleUpdateConfirm(BaseModel):
+    email: EmailStr
+    new_role: UserRole
+    code: str = Field(pattern=r"^\d{6}$")
+
+
+class UserRoleEdit(BaseModel):
+    role: UserRole

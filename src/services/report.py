@@ -1,10 +1,10 @@
-
 from pydantic import ValidationError
 from exceptions import ReportParametersValidationException
 from schemas.report.report_task import ReportTaskAdd, Status
 from src.services.base import BaseService
 from src.tasks.tasks import make_report
-from src.tasks.report import   ReportService
+from src.tasks.report import ReportService
+
 
 class ReportServiceS(BaseService):
     async def generate_report_task(

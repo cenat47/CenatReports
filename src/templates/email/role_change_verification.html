@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Подтверждение изменения роли</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f4f6f8;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 600px;
+      margin: 40px auto;
+      background-color: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      padding: 30px;
+    }
+    h2 {
+      color: #1a73e8;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    p {
+      font-size: 16px;
+      color: #333333;
+      line-height: 1.5;
+    }
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+    li {
+      font-size: 16px;
+      margin-bottom: 8px;
+    }
+    .code-box {
+      display: block;
+      background-color: #f1f3f4;
+      border: 2px dashed #1a73e8;
+      color: #1a73e8;
+      font-size: 32px;
+      font-weight: bold;
+      letter-spacing: 6px;
+      text-align: center;
+      padding: 20px;
+      margin: 20px 0;
+      border-radius: 8px;
+    }
+    .footer {
+      font-size: 14px;
+      color: #888888;
+      text-align: center;
+      margin-top: 30px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Подтверждение изменения роли</h2>
+
+    <p>Вы запросили изменение роли пользователя:</p>
+
+    <ul>
+      <li><b>Email пользователя:</b> {{ target_email }}</li>
+      <li><b>Новая роль:</b> {{ new_role }}</li>
+    </ul>
+
+    <p>Введите код подтверждения в течение 10 минут:</p>
+
+    <div class="code-box">{{ code }}</div>
+
+    <p>Если вы не отправляли этот запрос, просто проигнорируйте это письмо.</p>
+
+    <div class="footer">
+      &copy; 2025 CenatReports. Все данные защищены.
+    </div>
+  </div>
+</body>
+</html>

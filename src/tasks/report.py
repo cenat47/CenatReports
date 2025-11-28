@@ -145,7 +145,7 @@ class ReportService:
                 send_report_ready_email_task.delay(
                     to_email=user.email,
                     report_name=report_name,
-                    report_link=report_link  
+                    report_link=report_link,
                 )
 
     async def make_report_h(self, task_id: str):
