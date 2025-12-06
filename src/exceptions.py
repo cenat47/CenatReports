@@ -11,7 +11,8 @@ class MainException(HTTPException):
 
 class ObjectIsNotExistsException(MainException):
     status_code = status.HTTP_404_NOT_FOUND
-    detail = "Обьект не найден"
+    detail = "Объект не найден"
+
 
 class WeakPasswordException(MainException):
     status_code = status.HTTP_400_BAD_REQUEST
@@ -65,7 +66,7 @@ class InvalidVerificationCodeException(MainException):
 
 class UserNotFoundException(MainException):
     status_code = status.HTTP_404_NOT_FOUND
-    detail = "User not found"
+    detail = "Пользователь не найден"
 
 
 class UserSelfRoleUpdateException(MainException):
@@ -75,17 +76,22 @@ class UserSelfRoleUpdateException(MainException):
 
 class ReportIsNotReady(MainException):
     status_code = status.HTTP_400_BAD_REQUEST
-    detail = "Отчет еще не готов"
+    detail = "Отчёт ещё не готов"
 
 
 class UserNotActiveException(MainException):
     status_code = status.HTTP_403_FORBIDDEN
-    detail = "User is not active"
+    detail = "Пользователь неактивен"
 
 
 class EmailNotVerifiedException(MainException):
     status_code = status.HTTP_403_FORBIDDEN
     detail = "Пользователь не подтвердил email"
+
+
+class IPBlockedException(MainException):
+    status_code = status.HTTP_429_TOO_MANY_REQUESTS
+    detail = "IP-адрес временно заблокирован из-за множественных неудачных попыток входа"
 
 
 class AppException(Exception):

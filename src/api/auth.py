@@ -12,10 +12,29 @@ from src.api.dependencies import DBDep, get_current_active_user_Dep
 from src.exceptions import InvalidCredentialsException, InvalidTokenException
 
 
-router = APIRouter(prefix="/auth", tags=["auth"])
+router = APIRouter(prefix="/auth", tags=["Аутентификация"])
 
 
-@router.post("/register")
+@router.post(
+    "/register",
+    summary="Регистрация нового пользователя",
+    description="""Регистрирует нового пользователя в системе.
+
+После успешной регистрации на email отправляется код подтверждения.
+Для активации аккаунта необходимо подтвердить email через /verify.
+
+Требования к паролю:
+- Минимум 8 символов
+- Заглавная латинская буква
+- Строчная латинская буква
+- Цифра
+- Только ASCII символы""",
+    responses={
+        200: {"description": "Пользователь зарегистрирован, код отправлен на email"},
+        400: {"description": "Некорректные данные"},
+        409: {"description": "Пользователь уже существует"}
+    }
+)
 async def register(user: UserRequest, db: DBDep):
     return [
         await UserService(db).register_new_user(user),
@@ -23,23 +42,58 @@ async def register(user: UserRequest, db: DBDep):
     ]
 
 
-@router.post("/verify")
+@router.post(
+    "/verify",
+    summary="Подтверждение email",
+    description="""Подтверждает email пользователя с помощью кода из письма.
+
+После успешного подтверждения аккаунт активируется и можно выполнить вход.""",
+    responses={
+        200: {"description": "Email успешно подтверждён"},
+        400: {"description": "Неверный код подтверждения"}
+    }
+)
 async def verify(data: UserVerify, db: DBDep):
     return await UserService(db).verify_user(data)
 
 
-@router.post("/reverify")
+@router.post(
+    "/reverify",
+    summary="Повторная отправка кода подтверждения",
+    description="""Отправляет новый код подтверждения на email.
+
+Используется если предыдущий код истёк или был утерян.""",
+    responses={
+        200: {"description": "Код отправлен (если email существует)"}
+    }
+)
 async def reverify(data: UserReverify, db: DBDep):
     return await UserService(db).reverify_user(data)
 
 
-@router.post("/login")
+@router.post(
+    "/login",
+    summary="Вход в систему",
+    description="""Аутентификация пользователя по email и паролю.
+
+При успешном входе устанавливаются cookie с access и refresh токенами.
+
+Защита от брутфорса:
+- Все попытки входа записываются в аудит-лог
+
+Возвращает токены в теле ответа и устанавливает httpOnly cookies.""",
+    response_model=Token,
+    responses={
+        200: {"description": "Успешный вход, токены установлены"},
+        401: {"description": "Неверный email или пароль"},
+        429: {"description": "IP заблокирован после множественных неудачных попыток"}
+    }
+)
 async def login(
     data: UserLogin, response: Response, request: Request, db: DBDep
 ) -> Token:
     user = await UserService(db).authenticate_user(data)
     if not user:
-        # Аудит неудачного входа
         await AuditService(db).log(
             AuditLogCreate(
                 action=AuditAction.LOGIN_FAILED,
@@ -52,7 +106,6 @@ async def login(
 
     token = await UserService(db).create_token(user.id, request.client.host)
 
-    # Аудит успешного входа
     await AuditService(db).log(
         AuditLogCreate(
             action=AuditAction.LOGIN_SUCCESS,
@@ -81,7 +134,18 @@ async def login(
     return token
 
 
-@router.post("/logout")
+@router.post(
+    "/logout",
+    summary="Выход из системы",
+    description="""Завершает текущую сессию пользователя.
+
+Удаляет refresh-токен из базы данных и очищает cookies.
+Действие записывается в аудит-лог.""",
+    responses={
+        200: {"description": "Успешный выход из системы"},
+        401: {"description": "Невалидный токен"}
+    }
+)
 async def logout(request: Request, response: Response, db: DBDep):
     access_token = request.cookies.get("access_token")
     refresh_token = request.cookies.get("refresh_token")
@@ -93,7 +157,6 @@ async def logout(request: Request, response: Response, db: DBDep):
         except (ValueError, TypeError):
             raise InvalidTokenException
 
-        # Получаем user_id ДО удаления сессии
         session = await db.refresh_token.get_one_or_none(
             refresh_token=refresh_token_uuid
         )
@@ -101,7 +164,6 @@ async def logout(request: Request, response: Response, db: DBDep):
 
         await UserService(db).logout(refresh_token_uuid, ip_address=request.client.host)
 
-        # Аудит выхода
         await AuditService(db).log(
             AuditLogCreate(
                 action=AuditAction.LOGOUT,
@@ -117,7 +179,21 @@ async def logout(request: Request, response: Response, db: DBDep):
         return "Вы успешно вышли из системы"
 
 
-@router.post("/refresh")
+@router.post(
+    "/refresh",
+    summary="Обновление токенов",
+    description="""Обновляет access и refresh токены.
+
+Использует refresh-токен из cookies для генерации новой пары токенов.
+Старый refresh-токен удаляется, создаётся новый (token rotation).
+
+Действие записывается в аудит-лог.""",
+    response_model=Token,
+    responses={
+        200: {"description": "Токены успешно обновлены"},
+        401: {"description": "Невалидный или истёкший refresh-токен"}
+    }
+)
 async def refresh_token(request: Request, response: Response, db: DBDep) -> Token:
     refresh_token = request.cookies.get("refresh_token")
     if not refresh_token:
@@ -125,7 +201,6 @@ async def refresh_token(request: Request, response: Response, db: DBDep) -> Toke
     try:
         refresh_token_uuid = uuid.UUID(refresh_token)
 
-        # Получаем сессию для user_id
         session = await db.refresh_token.get_one_or_none(
             refresh_token=refresh_token_uuid
         )
@@ -135,7 +210,6 @@ async def refresh_token(request: Request, response: Response, db: DBDep) -> Toke
             ip_address=request.client.host,
         )
 
-        # Аудит обновления токена
         if session:
             await AuditService(db).log(
                 AuditLogCreate(
@@ -168,7 +242,20 @@ async def refresh_token(request: Request, response: Response, db: DBDep) -> Toke
     return new_token
 
 
-@router.post("/abort")
+@router.post(
+    "/abort",
+    summary="Завершение всех сессий",
+    description="""Завершает все активные сессии пользователя.
+
+Удаляет все refresh-токены пользователя из базы данных.
+Используется для экстренного выхода со всех устройств (например, при подозрении на взлом).
+
+Действие записывается в аудит-лог.""",
+    responses={
+        200: {"description": "Все сессии завершены"},
+        401: {"description": "Невалидный токен"}
+    }
+)
 async def abort_all_sessions(
     response: Response,
     request: Request,
@@ -176,7 +263,6 @@ async def abort_all_sessions(
 ):
     refresh_token = request.cookies.get("refresh_token")
 
-    # Получаем user_id ДО удаления сессий
     if refresh_token:
         try:
             refresh_token_uuid = uuid.UUID(refresh_token)
@@ -191,7 +277,6 @@ async def abort_all_sessions(
 
     await UserService(db).abort_all_sessions(refresh_token, request.client.host)
 
-    # Аудит завершения всех сессий
     if user_id:
         await AuditService(db).log(
             AuditLogCreate(
@@ -207,7 +292,17 @@ async def abort_all_sessions(
     return {"message": "All sessions was aborted"}
 
 
-@router.post("/me")
+@router.post(
+    "/me",
+    summary="Получение информации о текущем пользователе",
+    description="""Возвращает данные авторизованного пользователя.
+
+Требуется валидный access-токен.""",
+    responses={
+        200: {"description": "Данные пользователя"},
+        401: {"description": "Не авторизован"}
+    }
+)
 async def get_me(
     user: get_current_active_user_Dep,
 ):
