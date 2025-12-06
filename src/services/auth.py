@@ -11,6 +11,7 @@ from src.exceptions import (
     ObjectAlreadyExistsException,
     UserAlreadyExistsException,
     UserNotFoundException,
+    WeakPasswordException,
 )
 from src.schemas.auth.refresh_token import RefreshTokenAdd, Token
 from src.schemas.auth.user import (
@@ -24,12 +25,15 @@ from src.schemas.auth.user import (
     VerifyStatus,
 )
 from src.services.base import BaseService
-from src.utils.password_utils import get_password_hash, is_valid_password
+from src.utils.password_utils import get_password_hash, is_valid_password, validate_password_strength
 from src.tasks.email_tasks import send_verification_email_task
 
 
 class UserService(BaseService):
     async def register_new_user(self, user: UserRequest) -> User:
+        is_valid, error_message = validate_password_strength(user.password)
+        if not is_valid:
+            raise WeakPasswordException(detail=error_message)
         password_hash = get_password_hash(user.password)
         useradd = UserAdd(
             email=user.email,

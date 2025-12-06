@@ -13,6 +13,15 @@ class ObjectIsNotExistsException(MainException):
     status_code = status.HTTP_404_NOT_FOUND
     detail = "Обьект не найден"
 
+class WeakPasswordException(MainException):
+    status_code = status.HTTP_400_BAD_REQUEST
+    detail = "Пароль не соответствует требованиям безопасности"
+    
+    def __init__(self, detail: str = None):
+        if detail:
+            self.detail = detail
+        super().__init__()
+
 
 class TempelateIsNotExistsException(MainException):
     status_code = status.HTTP_404_NOT_FOUND
