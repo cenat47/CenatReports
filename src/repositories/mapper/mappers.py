@@ -1,3 +1,5 @@
+from src.models.security.audit import AuditORM
+from src.schemas.security.audit import Audit
 from src.models.report.sales_by_customer import SalesByCustomerDailyORM
 from src.repositories.report.sales_by_customer import SalesByCustomerDaily
 from src.schemas.report.sales_by_product_category_daily import SalesByCategoryDaily
@@ -100,3 +102,8 @@ class SalesByProductCategoryDailyDataMapper(DataMapper):
 class SalesByCustomerDailyDataMapper(DataMapper):
     db_model = SalesByCustomerDailyORM
     schema = SalesByCustomerDaily
+
+
+class AuditDataMapper(DataMapper):
+    db_model = AuditORM
+    schema = Audit

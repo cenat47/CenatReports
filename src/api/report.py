@@ -1,5 +1,5 @@
 import uuid
-from fastapi import APIRouter, Body
+from fastapi import APIRouter, Body, Request
 from fastapi.responses import FileResponse
 
 from api.dependencies import DBDep
@@ -12,11 +12,14 @@ from exceptions import (
     TempelateIsNotExistsException,
 )
 from schemas.report.report_task import ReportRequest, ReportTaskStatus
+from schemas.security.audit import AuditLogCreate, AuditAction
 from services.report import ReportServiceS
+from services.audit import AuditService
 from src.api.dependencies import (
     get_current_active_manager_Dep,
     get_current_active_user_Dep,
 )
+from src.schemas.report.example import REPORT_EXAMPLES
 
 router = APIRouter(prefix="/report", tags=["report"])
 
@@ -25,157 +28,35 @@ router = APIRouter(prefix="/report", tags=["report"])
 async def generate_report(
     db: DBDep,
     user: get_current_active_manager_Dep,
-    request: ReportRequest = Body(
-        openapi_examples={
-            # === DAILY SALES ===
-            "daily_sales": {
-                "summary": "Daily Sales Report",
-                "value": {
-                    "report_name": "daily_sales",
-                    "parameters": {"date_from": "2023-11-16", "date_to": "2025-11-15"},
-                },
-            },
-            "daily_sales_summary": {
-                "summary": "Daily Sales Report Summary",
-                "value": {
-                    "report_name": "daily_sales_summary",
-                    "parameters": {"date_from": "2023-11-16", "date_to": "2025-11-15"},
-                },
-            },
-            # === CATEGORY REPORTS ===
-            "sales_by_category_daily": {
-                "summary": "Sales by Category — Daily Details",
-                "value": {
-                    "report_name": "sales_by_categories",
-                    "parameters": {
-                        "date_from": "2025-01-01",
-                        "date_to": "2025-01-31",
-                        "category_id": 3,
-                        "top": 10,
-                    },
-                },
-            },
-            "sales_by_category_summary": {
-                "summary": "Sales by Category — Summary",
-                "value": {
-                    "report_name": "sales_by_categories_summary",
-                    "parameters": {
-                        "date_from": "2025-01-01",
-                        "date_to": "2025-01-31",
-                        "category_id": 3,
-                        "top": 5,
-                    },
-                },
-            },
-            # === PRODUCT REPORTS ===
-            "sales_by_product_daily": {
-                "summary": "Sales by Product — Daily Details",
-                "value": {
-                    "report_name": "sales_by_products",
-                    "parameters": {
-                        "date_from": "2025-01-01",
-                        "date_to": "2025-01-31",
-                        "product_id": 15,
-                        "top": 5,
-                    },
-                },
-            },
-            "sales_by_product_summary": {
-                "summary": "Sales by Product — Summary",
-                "value": {
-                    "report_name": "sales_by_products_summary",
-                    "parameters": {
-                        "date_from": "2025-01-01",
-                        "date_to": "2025-01-31",
-                        "product_id": 15,
-                        "top": 5,
-                    },
-                },
-            },
-            # === CATEGORY TOP ===
-            "sales_by_category_top": {
-                "summary": "Top Categories by sales",
-                "value": {
-                    "report_name": "sales_by_categories_summary",
-                    "parameters": {
-                        "date_from": "2025-01-01",
-                        "date_to": "2025-01-31",
-                        "top": 5,
-                    },
-                },
-            },
-            # === PRODUCT TOP ===
-            "sales_by_product_top": {
-                "summary": "Top Products by sales",
-                "value": {
-                    "report_name": "sales_by_products_summary",
-                    "parameters": {
-                        "date_from": "2025-01-01",
-                        "date_to": "2025-01-31",
-                        "top": 5,
-                    },
-                },
-            },
-            "sales_by_customer_daily": {
-                "summary": "Sales by Customer — Daily Details",
-                "value": {
-                    "report_name": "customers",
-                    "parameters": {
-                        "date_from": "2025-01-01",
-                        "date_to": "2025-01-31",
-                        "customer_id": 301,
-                    },
-                },
-            },
-            "sales_by_customer_summary": {
-                "summary": "Top Customers by sales",
-                "value": {
-                    "report_name": "customers_summary",
-                    "parameters": {
-                        "date_from": "2025-01-01",
-                        "date_to": "2025-01-31",
-                        "top": 10,
-                    },
-                },
-            },
-            "payments_daily": {
-                "summary": "Payments by Method — Daily",
-                "value": {
-                    "report_name": "payments",
-                    "parameters": {
-                        "date_from": "2025-01-01",
-                        "date_to": "2025-01-31",
-                        "payment_method": "card",
-                    },
-                },
-            },
-            "payments_summary": {
-                "summary": "Payments by Method — Summary",
-                "value": {
-                    "report_name": "payments_summary",
-                    "parameters": {"date_from": "2025-01-01", "date_to": "2025-01-31"},
-                },
-            },
-            "payments_top": {
-                "summary": "Top Payment Methods",
-                "value": {
-                    "report_name": "payments_summary",
-                    "parameters": {
-                        "date_from": "2025-01-01",
-                        "date_to": "2025-01-31",
-                        "top": 2,
-                    },
-                },
-            },
-        }
-    ),
+    http_request: Request,
+    request: ReportRequest = Body(openapi_examples=REPORT_EXAMPLES),
 ):
     try:
-        return await ReportServiceS(db).generate_report_task(
+        task = await ReportServiceS(db).generate_report_task(
             user_id=user.id,
             report_name=request.report_name,
             parameters=request.parameters,
         )
+
+        # Аудит создания задачи на генерацию отчёта
+        await AuditService(db).log(
+            AuditLogCreate(
+                action=AuditAction.REPORT_GENERATE,
+                user_id=user.id,
+                table_name="report_tasks",
+                record_id=str(task.id),
+                new_values={
+                    "report_name": request.report_name,
+                    "parameters": request.parameters,
+                },
+                ip_address=http_request.client.host,
+                user_agent=http_request.headers.get("user-agent"),
+                details=f"User {user.email} requested report: {request.report_name}",
+            )
+        )
+
+        return {"task_id": task.id, "status": "pending"}
+
     except ValueError:
         raise TempelateIsNotExistsException
     except ReportParametersValidationException:
@@ -184,7 +65,10 @@ async def generate_report(
 
 @router.get("/status/{task_id}", response_model=ReportTaskStatus)
 async def get_report_status(
-    task_id: uuid.UUID, db: DBDep, current_user: get_current_active_user_Dep
+    task_id: uuid.UUID,
+    db: DBDep,
+    current_user: get_current_active_user_Dep,
+    request: Request,
 ):
     task = await db.report_task.get_one_or_none(id=task_id)
     if task is None:
@@ -195,6 +79,18 @@ async def get_report_status(
         "admin",
         "superadmin",
     ]:
+        # Аудит попытки несанкционированного доступа
+        await AuditService(db).log(
+            AuditLogCreate(
+                action=AuditAction.ACCESS_DENIED,
+                user_id=current_user.id,
+                table_name="report_tasks",
+                record_id=str(task_id),
+                ip_address=request.client.host,
+                user_agent=request.headers.get("user-agent"),
+                details=f"User {current_user.email} tried to access report status owned by user_id={task.user_id}",
+            )
+        )
         raise PermissionDeniedException
 
     status = task.status
@@ -211,7 +107,10 @@ async def get_report_status(
 
 @router.get("/download/{task_id}")
 async def download_report(
-    task_id: uuid.UUID, db: DBDep, current_user: get_current_active_user_Dep
+    task_id: uuid.UUID,
+    db: DBDep,
+    current_user: get_current_active_user_Dep,
+    request: Request,
 ):
     # Получаем задачу
     task = await db.report_task.get_one_or_none(id=task_id)
@@ -223,11 +122,36 @@ async def download_report(
         "admin",
         "superadmin",
     ]:
+        # Аудит попытки несанкционированного доступа
+        await AuditService(db).log(
+            AuditLogCreate(
+                action=AuditAction.ACCESS_DENIED,
+                user_id=current_user.id,
+                table_name="report_tasks",
+                record_id=str(task_id),
+                ip_address=request.client.host,
+                user_agent=request.headers.get("user-agent"),
+                details=f"User {current_user.email} tried to download report owned by user_id={task.user_id}",
+            )
+        )
         raise PermissionDeniedException
 
     # Проверяем, готов ли файл
     if task.status != "ready" or not task.result_file:
         raise ReportIsNotReady
+
+    # Аудит успешного скачивания отчёта
+    await AuditService(db).log(
+        AuditLogCreate(
+            action=AuditAction.REPORT_DOWNLOAD,
+            user_id=current_user.id,
+            table_name="report_tasks",
+            record_id=str(task_id),
+            ip_address=request.client.host,
+            user_agent=request.headers.get("user-agent"),
+            details=f"User {current_user.email} downloaded report {task_id}",
+        )
+    )
 
     # Отдаём файл
     return FileResponse(

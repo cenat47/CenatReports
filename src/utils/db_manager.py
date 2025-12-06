@@ -1,3 +1,4 @@
+from src.repositories.security.audit import AuditRepository
 from src.repositories.report.payments_by_method import PaymentsRepository
 from src.repositories.report.sales_by_customer import SalesByCustomerRepository
 from src.repositories.report.sales_daily import SalesDailyRepository
@@ -36,6 +37,7 @@ class DBManager:
         self.report_task = ReportTaskRepository(self.session)
         self.report_template = ReportTemplateRepository(self.session)
         self.sales_daily = SalesDailyRepository(self.session)
+        self.audit = AuditRepository(self.session)
         self.payments = PaymentsRepository(self.session)
         self.product_category_daily = SalesByProductCategoryDailyRepository(
             self.session

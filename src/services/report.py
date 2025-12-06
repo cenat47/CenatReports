@@ -38,4 +38,4 @@ class ReportServiceS(BaseService):
 
         make_report.delay(created_task.id)
 
-        return {"task_id": created_task.id, "status": "pending"}
+        return created_task

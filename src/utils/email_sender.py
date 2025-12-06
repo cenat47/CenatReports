@@ -24,13 +24,14 @@ def send_verification_email(to_email: str, code: str):
     with smtplib.SMTP_SSL(settings.SMTP_HOST, settings.SMTP_PORT) as smtp:
         smtp.login(settings.SMTP_USER, settings.SMTP_PASS)
         smtp.send_message(message)
-def send_role_change_email(admin_email: str, target_email: str, new_role: str, code: str):
+
+
+def send_role_change_email(
+    admin_email: str, target_email: str, new_role: str, code: str
+):
     template = env.get_template("role_change_verification.html")
     html_content = template.render(
-        code=code,
-        new_role=new_role,
-        admin_email=admin_email,
-        target_email=target_email
+        code=code, new_role=new_role, admin_email=admin_email, target_email=target_email
     )
 
     message = EmailMessage()
@@ -42,7 +43,6 @@ def send_role_change_email(admin_email: str, target_email: str, new_role: str, c
     with smtplib.SMTP_SSL(settings.SMTP_HOST, settings.SMTP_PORT) as smtp:
         smtp.login(settings.SMTP_USER, settings.SMTP_PASS)
         smtp.send_message(message)
-
 
     with smtplib.SMTP_SSL(settings.SMTP_HOST, settings.SMTP_PORT) as smtp:
         smtp.login(settings.SMTP_USER, settings.SMTP_PASS)

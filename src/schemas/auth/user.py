@@ -55,9 +55,12 @@ class LastLoginUpdate(BaseModel):
 
 class User(UserAdd):
     id: uuid.UUID
+
+
 class UserRoleUpdate(BaseModel):
     email: EmailStr
     new_role: UserRole
+
 
 class UserRoleUpdateConfirm(BaseModel):
     email: EmailStr

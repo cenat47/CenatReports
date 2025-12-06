@@ -20,6 +20,7 @@ from src.models.commerce import (
     product,
     supplier,
 )
+from src.models.security import audit
 from src.models.report import report_task, report_template
 
 # this is the Alembic Config object, which provides

@@ -69,8 +69,8 @@ class UserService(BaseService):
             return "Если email существует, код подтверждения отправлен"
         code = f"{random.randint(0, 999999):06d}"
         key = f"email_verification:{email}"
-        await self.redis.set(key, code, expire=600)
-        await self.send_verification_email(email, code)
+        await redis_manager.set(key=key, value=code, expire=600)
+        send_verification_email_task.delay(email, code)
         return "Если email существует, код подтверждения отправлен"
 
     async def authenticate_user(self, data: UserLogin):
@@ -163,8 +163,10 @@ class UserService(BaseService):
         )
 
     async def abort_all_sessions(self, token: uuid.UUID, ip_address: str):
-        token = await self.db.refresh_token.get_one_or_none(refresh_token=token)
-        if token.ip_address != ip_address:
+        session = await self.db.refresh_token.get_one_or_none(refresh_token=token)
+        if not session:
             raise InvalidTokenException
-        await self.db.refresh_token.delete(user_id=token.user_id)
-        await self.db.session.commit()
+        if session.ip_address != ip_address:
+            raise InvalidTokenException
+        await self.db.refresh_token.delete(user_id=session.user_id)
+        await self.db.commit()
