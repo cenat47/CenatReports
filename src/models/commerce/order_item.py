@@ -16,5 +16,5 @@ class OrderItemOrm(Base):
         DECIMAL(10, 2), Computed("quantity * price")
     )
 
-    order: Mapped["OrderORM"] = relationship(back_populates="order_items")
-    product: Mapped["ProductORM"] = relationship(back_populates="order_items")
+    order: Mapped["OrderORM"] = relationship(back_populates="order_items")  # noqa F821
+    product: Mapped["ProductORM"] = relationship(back_populates="order_items")  # noqa F821

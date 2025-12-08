@@ -13,6 +13,6 @@ class ProductORM(Base):
     category_id: Mapped[int] = mapped_column(ForeignKey("categories.id"))
     supplier_id: Mapped[int] = mapped_column(ForeignKey("suppliers.id"))
 
-    category: Mapped["CategoryORM"] = relationship(back_populates="products")
-    supplier: Mapped["SupplierORM"] = relationship(back_populates="products")
-    order_items: Mapped[list["OrderItemOrm"]] = relationship(back_populates="product")
+    category: Mapped["CategoryORM"] = relationship(back_populates="products")  # noqa F821
+    supplier: Mapped["SupplierORM"] = relationship(back_populates="products")  # noqa F821
+    order_items: Mapped[list["OrderItemOrm"]] = relationship(back_populates="product")  # noqa F821

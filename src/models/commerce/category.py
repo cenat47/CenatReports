@@ -10,4 +10,4 @@ class CategoryORM(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(100), index=True)
 
-    products: Mapped[list["ProductORM"]] = relationship(back_populates="category")
+    products: Mapped[list["ProductORM"]] = relationship(back_populates="category")  # noqa F821

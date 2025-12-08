@@ -15,6 +15,6 @@ class OrderORM(Base):
     status: Mapped[str] = mapped_column(String(50), index=True)
     total_amount: Mapped[float] = mapped_column(DECIMAL(10, 2))
 
-    customer: Mapped["CustomerORM"] = relationship(back_populates="orders")
-    order_items: Mapped[list["OrderItemOrm"]] = relationship(back_populates="order")
-    payments: Mapped[list["PaymentORM"]] = relationship(back_populates="order")
+    customer: Mapped["CustomerORM"] = relationship(back_populates="orders")  # noqa F821
+    order_items: Mapped[list["OrderItemOrm"]] = relationship(back_populates="order")  # noqa F821
+    payments: Mapped[list["PaymentORM"]] = relationship(back_populates="order")  # noqa F821

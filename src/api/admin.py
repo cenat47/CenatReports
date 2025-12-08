@@ -20,10 +20,10 @@ router = APIRouter(prefix="/admin", tags=["Администрирование"])
                 "application/json": {
                     "example": {"status": "Доступ администратора предоставлен"}
                 }
-            }
+            },
         },
-        403: {"description": "Недостаточно прав"}
-    }
+        403: {"description": "Недостаточно прав"},
+    },
 )
 async def admin_status(current_user: get_current_active_admin_Dep):
     return {"status": "Доступ администратора предоставлен"}
@@ -47,13 +47,15 @@ async def admin_status(current_user: get_current_active_admin_Dep):
             "description": "Запрос создан, код отправлен на email",
             "content": {
                 "application/json": {
-                    "example": {"message": "Код подтверждения отправлен на почту пользователя"}
+                    "example": {
+                        "message": "Код подтверждения отправлен на почту пользователя"
+                    }
                 }
-            }
+            },
         },
         403: {"description": "Недостаточно прав или попытка изменить свою роль"},
-        404: {"description": "Пользователь не найден"}
-    }
+        404: {"description": "Пользователь не найден"},
+    },
 )
 async def update_user_role(
     current_user: get_current_active_admin_Dep,
@@ -99,12 +101,12 @@ async def update_user_role(
                 "application/json": {
                     "example": {"message": "Роль пользователя успешно изменена"}
                 }
-            }
+            },
         },
         400: {"description": "Неверный код подтверждения"},
         403: {"description": "Недостаточно прав"},
-        404: {"description": "Пользователь не найден"}
-    }
+        404: {"description": "Пользователь не найден"},
+    },
 )
 async def confirm_user_role_update(
     current_user: get_current_active_admin_Dep,

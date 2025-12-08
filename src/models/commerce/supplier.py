@@ -11,4 +11,4 @@ class SupplierORM(Base):
     name: Mapped[str] = mapped_column(String(100), index=True)
     contact_info: Mapped[str] = mapped_column(String(200), nullable=True, index=True)
 
-    products: Mapped[list["ProductORM"]] = relationship(back_populates="supplier")
+    products: Mapped[list["ProductORM"]] = relationship(back_populates="supplier")  # noqa F821

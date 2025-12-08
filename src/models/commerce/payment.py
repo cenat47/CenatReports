@@ -15,4 +15,4 @@ class PaymentORM(Base):
     amount: Mapped[float] = mapped_column(DECIMAL(10, 2))
     method: Mapped[str] = mapped_column(String(50), index=True)
 
-    order: Mapped["OrderORM"] = relationship(back_populates="payments")
+    order: Mapped["OrderORM"] = relationship(back_populates="payments")  # noqa F821

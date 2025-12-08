@@ -6,6 +6,7 @@ from jose import jwt
 from src.config import settings
 from src.exceptions import (
     ExpiredTokenException,
+    IPBlockedException,
     InvalidTokenException,
     InvalidVerificationCodeException,
     ObjectAlreadyExistsException,
@@ -25,8 +26,13 @@ from src.schemas.auth.user import (
     VerifyStatus,
 )
 from src.services.base import BaseService
-from src.utils.password_utils import get_password_hash, is_valid_password, validate_password_strength
+from src.utils.password_utils import (
+    get_password_hash,
+    is_valid_password,
+    validate_password_strength,
+)
 from src.tasks.email_tasks import send_verification_email_task
+from utils.security import check_blocked, register_failed_attempt, reset_attempts
 
 
 class UserService(BaseService):
@@ -54,15 +60,21 @@ class UserService(BaseService):
         send_verification_email_task.delay(user.email, code)
         return db_user
 
-    async def verify_user(self, data: UserVerify) -> str:
+    async def verify_user(self, data: UserVerify, ip_address: str) -> str:
+        if await check_blocked("verify:ip", ip_address):
+            raise IPBlockedException
+        if await check_blocked("verify:email", data.email):
+            raise IPBlockedException
         key = f"email_verification:{data.email}"
         code = await redis_manager.get(key)
-        if not code:
-            raise InvalidVerificationCodeException
-        if code != data.code:
+        if not code or code != data.code:
+            await register_failed_attempt("verify:ip", ip_address)
+            await register_failed_attempt("verify:email", data.email)
             raise InvalidVerificationCodeException
         await self.db.user.edit(data=VerifyStatus(is_verified=True), email=data.email)
         await self.db.commit()
+        await reset_attempts("verify:ip", ip_address)
+        await reset_attempts("verify:email", data.email)
         await redis_manager.delete(key)
         return "Email успешно подтверждён"
 
@@ -77,14 +89,22 @@ class UserService(BaseService):
         send_verification_email_task.delay(email, code)
         return "Если email существует, код подтверждения отправлен"
 
-    async def authenticate_user(self, data: UserLogin):
+    async def authenticate_user(self, data: UserLogin, ip_address: str):
+        if await check_blocked("login:ip", ip_address):
+            return None
+        if await check_blocked("login:email", data.email):
+            return None
         db_user = await self.db.user.get_one_or_none(email=data.email)
         if db_user and is_valid_password(data.password, db_user.password_hash):
+            await reset_attempts("login:ip", ip_address)
+            await reset_attempts("login:email", data.email)
             await self.db.user.edit(
                 data=LastLoginUpdate(last_login_at=datetime.now(timezone.utc)),
                 id=db_user.id,
             )
             return db_user
+        await register_failed_attempt("login:ip", ip_address)
+        await register_failed_attempt("login:email", data.email)
         return None
 
     async def create_token(self, user_id: uuid.UUID, ip_address: str) -> Token:

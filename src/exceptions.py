@@ -1,6 +1,9 @@
 from fastapi import HTTPException, status
 
 
+# Базовые HTTP-исключения
+
+
 class MainException(HTTPException):
     status_code = 500
     detail = "Неизвестная ошибка"
@@ -14,34 +17,9 @@ class ObjectIsNotExistsException(MainException):
     detail = "Объект не найден"
 
 
-class WeakPasswordException(MainException):
-    status_code = status.HTTP_400_BAD_REQUEST
-    detail = "Пароль не соответствует требованиям безопасности"
-    
-    def __init__(self, detail: str = None):
-        if detail:
-            self.detail = detail
-        super().__init__()
-
-
-class TempelateIsNotExistsException(MainException):
-    status_code = status.HTTP_404_NOT_FOUND
-    detail = "Шаблон не найден"
-
-
-class ReportParametersValidationHTTPException(MainException):
-    status_code = status.HTTP_422_UNPROCESSABLE_CONTENT
-    detail = "Параметры не валидны"
-
-
-class UserAlreadyExistsException(MainException):
-    status_code = status.HTTP_409_CONFLICT
-    detail = "Пользователь с данным email существует"
-
-
-class InvalidCredentialsException(MainException):
+class InvalidTokenException(MainException):
     status_code = status.HTTP_401_UNAUTHORIZED
-    detail = "Неверный email или пароль"
+    detail = "Недействительный токен"
 
 
 class ExpiredTokenException(MainException):
@@ -49,14 +27,27 @@ class ExpiredTokenException(MainException):
     detail = "Срок действия токена истёк"
 
 
-class InvalidTokenException(MainException):
+# Регистрация, аутентификация, статус пользователя
+
+
+class UserAlreadyExistsException(MainException):
+    status_code = status.HTTP_409_CONFLICT
+    detail = "Пользователь с данным email существует"
+
+
+class WeakPasswordException(MainException):
+    status_code = status.HTTP_400_BAD_REQUEST
+    detail = "Пароль не соответствует требованиям безопасности"
+
+    def __init__(self, detail: str = None):
+        if detail:
+            self.detail = detail
+        super().__init__()
+
+
+class InvalidCredentialsException(MainException):
     status_code = status.HTTP_401_UNAUTHORIZED
-    detail = "Недействительный токен"
-
-
-class PermissionDeniedException(MainException):
-    status_code = status.HTTP_403_FORBIDDEN
-    detail = "Недостаточно прав"
+    detail = "Неверный email или пароль"
 
 
 class InvalidVerificationCodeException(MainException):
@@ -67,16 +58,6 @@ class InvalidVerificationCodeException(MainException):
 class UserNotFoundException(MainException):
     status_code = status.HTTP_404_NOT_FOUND
     detail = "Пользователь не найден"
-
-
-class UserSelfRoleUpdateException(MainException):
-    status_code = status.HTTP_400_BAD_REQUEST
-    detail = "Нельзя изменить роль самого себя"
-
-
-class ReportIsNotReady(MainException):
-    status_code = status.HTTP_400_BAD_REQUEST
-    detail = "Отчёт ещё не готов"
 
 
 class UserNotActiveException(MainException):
@@ -91,7 +72,43 @@ class EmailNotVerifiedException(MainException):
 
 class IPBlockedException(MainException):
     status_code = status.HTTP_429_TOO_MANY_REQUESTS
-    detail = "IP-адрес временно заблокирован из-за множественных неудачных попыток входа"
+    detail = (
+        "IP-адрес временно заблокирован из-за множественных неудачных попыток входа"
+    )
+
+
+# Права доступа и администрирование
+
+
+class PermissionDeniedException(MainException):
+    status_code = status.HTTP_403_FORBIDDEN
+    detail = "Недостаточно прав"
+
+
+class UserSelfRoleUpdateException(MainException):
+    status_code = status.HTTP_400_BAD_REQUEST
+    detail = "Нельзя изменить роль самого себя"
+
+
+# Отчёты
+
+
+class TempelateIsNotExistsException(MainException):
+    status_code = status.HTTP_404_NOT_FOUND
+    detail = "Шаблон не найден"
+
+
+class ReportParametersValidationHTTPException(MainException):
+    status_code = status.HTTP_422_UNPROCESSABLE_ENTITY
+    detail = "Параметры не валидны"
+
+
+class ReportIsNotReady(MainException):
+    status_code = status.HTTP_400_BAD_REQUEST
+    detail = "Отчёт ещё не готов"
+
+
+# Базовые бизнес-исключения приложения (не HTTP)
 
 
 class AppException(Exception):

@@ -32,8 +32,8 @@ router = APIRouter(prefix="/auth", tags=["Аутентификация"])
     responses={
         200: {"description": "Пользователь зарегистрирован, код отправлен на email"},
         400: {"description": "Некорректные данные"},
-        409: {"description": "Пользователь уже существует"}
-    }
+        409: {"description": "Пользователь уже существует"},
+    },
 )
 async def register(user: UserRequest, db: DBDep):
     return [
@@ -50,8 +50,8 @@ async def register(user: UserRequest, db: DBDep):
 После успешного подтверждения аккаунт активируется и можно выполнить вход.""",
     responses={
         200: {"description": "Email успешно подтверждён"},
-        400: {"description": "Неверный код подтверждения"}
-    }
+        400: {"description": "Неверный код подтверждения"},
+    },
 )
 async def verify(data: UserVerify, db: DBDep):
     return await UserService(db).verify_user(data)
@@ -63,9 +63,7 @@ async def verify(data: UserVerify, db: DBDep):
     description="""Отправляет новый код подтверждения на email.
 
 Используется если предыдущий код истёк или был утерян.""",
-    responses={
-        200: {"description": "Код отправлен (если email существует)"}
-    }
+    responses={200: {"description": "Код отправлен (если email существует)"}},
 )
 async def reverify(data: UserReverify, db: DBDep):
     return await UserService(db).reverify_user(data)
@@ -86,13 +84,13 @@ async def reverify(data: UserReverify, db: DBDep):
     responses={
         200: {"description": "Успешный вход, токены установлены"},
         401: {"description": "Неверный email или пароль"},
-        429: {"description": "IP заблокирован после множественных неудачных попыток"}
-    }
+        429: {"description": "IP заблокирован после множественных неудачных попыток"},
+    },
 )
 async def login(
     data: UserLogin, response: Response, request: Request, db: DBDep
 ) -> Token:
-    user = await UserService(db).authenticate_user(data)
+    user = await UserService(db).authenticate_user(data, request.client.host)
     if not user:
         await AuditService(db).log(
             AuditLogCreate(
@@ -143,8 +141,8 @@ async def login(
 Действие записывается в аудит-лог.""",
     responses={
         200: {"description": "Успешный выход из системы"},
-        401: {"description": "Невалидный токен"}
-    }
+        401: {"description": "Невалидный токен"},
+    },
 )
 async def logout(request: Request, response: Response, db: DBDep):
     access_token = request.cookies.get("access_token")
@@ -191,8 +189,8 @@ async def logout(request: Request, response: Response, db: DBDep):
     response_model=Token,
     responses={
         200: {"description": "Токены успешно обновлены"},
-        401: {"description": "Невалидный или истёкший refresh-токен"}
-    }
+        401: {"description": "Невалидный или истёкший refresh-токен"},
+    },
 )
 async def refresh_token(request: Request, response: Response, db: DBDep) -> Token:
     refresh_token = request.cookies.get("refresh_token")
@@ -253,8 +251,8 @@ async def refresh_token(request: Request, response: Response, db: DBDep) -> Toke
 Действие записывается в аудит-лог.""",
     responses={
         200: {"description": "Все сессии завершены"},
-        401: {"description": "Невалидный токен"}
-    }
+        401: {"description": "Невалидный токен"},
+    },
 )
 async def abort_all_sessions(
     response: Response,
@@ -300,8 +298,8 @@ async def abort_all_sessions(
 Требуется валидный access-токен.""",
     responses={
         200: {"description": "Данные пользователя"},
-        401: {"description": "Не авторизован"}
-    }
+        401: {"description": "Не авторизован"},
+    },
 )
 async def get_me(
     user: get_current_active_user_Dep,

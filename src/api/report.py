@@ -43,14 +43,17 @@ router = APIRouter(prefix="/report", tags=["Отчёты"])
             "description": "Задача создана",
             "content": {
                 "application/json": {
-                    "example": {"task_id": "123e4567-e89b-12d3-a456-426614174000", "status": "pending"}
+                    "example": {
+                        "task_id": "123e4567-e89b-12d3-a456-426614174000",
+                        "status": "pending",
+                    }
                 }
-            }
+            },
         },
         422: {"description": "Некорректные параметры отчёта"},
         403: {"description": "Недостаточно прав (требуется роль manager)"},
-        404: {"description": "Шаблон отчёта не найден"}
-    }
+        404: {"description": "Шаблон отчёта не найден"},
+    },
 )
 async def generate_report(
     db: DBDep,
@@ -107,8 +110,8 @@ async def generate_report(
     responses={
         200: {"description": "Статус задачи"},
         403: {"description": "Попытка доступа к чужому отчёту"},
-        404: {"description": "Задача не найдена"}
-    }
+        404: {"description": "Задача не найдена"},
+    },
 )
 async def get_report_status(
     task_id: uuid.UUID,
@@ -163,13 +166,10 @@ async def get_report_status(
 - Попытки несанкционированного доступа фиксируются
 - Файлы хранятся вне web-root директории""",
     responses={
-        200: {
-            "description": "CSV файл с отчётом",
-            "content": {"text/csv": {}}
-        },
+        200: {"description": "CSV файл с отчётом", "content": {"text/csv": {}}},
         403: {"description": "Попытка скачать чужой отчёт"},
         404: {"description": "Отчёт не найден"},
-    }
+    },
 )
 async def download_report(
     task_id: uuid.UUID,
@@ -226,8 +226,8 @@ async def download_report(
 Включает задачи со всеми статусами: pending, ready, error.""",
     responses={
         200: {"description": "Список задач пользователя"},
-        401: {"description": "Не авторизован"}
-    }
+        401: {"description": "Не авторизован"},
+    },
 )
 async def get_my_report(current_user: get_current_active_user_Dep, db: DBDep):
     return await db.report_task.get_all(user_id=current_user.id)
@@ -243,9 +243,7 @@ async def get_my_report(current_user: get_current_active_user_Dep, db: DBDep):
 - Описании
 - Требуемых параметрах
 - Ролях, которым доступен отчёт""",
-    responses={
-        200: {"description": "Список шаблонов отчётов"}
-    }
+    responses={200: {"description": "Список шаблонов отчётов"}},
 )
 async def get_all_template(db: DBDep):
     return await db.report_template.get_all()

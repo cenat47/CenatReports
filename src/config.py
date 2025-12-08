@@ -28,6 +28,9 @@ class Settings(BaseSettings):
     SMTP_PORT: int
     SMTP_USER: str
     SMTP_PASS: str
+    ATTEMPT_LIMIT: int
+    BLOCK_TIME_SECONDS: int
+    FAILED_TTL_SECONDS: int
 
     @property
     def DB_URL(self):

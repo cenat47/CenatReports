@@ -13,4 +13,4 @@ class CustomerORM(Base):
     phone: Mapped[str] = mapped_column(String(20), index=True)
     address: Mapped[str] = mapped_column(String(200))
 
-    orders: Mapped[list["OrderORM"]] = relationship(back_populates="customer")
+    orders: Mapped[list["OrderORM"]] = relationship(back_populates="customer")  # noqa F821
