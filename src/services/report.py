@@ -25,6 +25,11 @@ class ReportServiceS(BaseService):
             validated_params = config["param_model"](**parameters)
         except ValidationError:
             raise ReportParametersValidationException()
+        date_from = getattr(validated_params, "date_from", None)
+        date_to = getattr(validated_params, "date_to", None)
+        if date_from and date_to and date_from > date_to:
+            raise ReportParametersValidationException()
+
         # 4. Создаём задачу
         new_task = ReportTaskAdd(
             user_id=user_id,

@@ -10,7 +10,7 @@ from src.schemas.report.sales_by_product_category_daily import (
     SalesByCategoryDailyParams,
     SalesByProductDailyParams,
 )
-from src.schemas.report.report_task import ReportTaskReady, Status
+from src.schemas.report.report_task import ErrorMessage, ReportTaskReady, Status
 from src.schemas.report.sales_daily import SalesDailyParams
 from src.utils.db_manager import DBManager
 from src.database import async_session_maker_null_pооl
@@ -77,7 +77,8 @@ class ReportService:
     async def _save_report_to_csv(self, task_id: str, data, is_summary: bool = False):
         """Универсальный метод сохранения отчета в CSV, работает с одним объектом или списком объектов"""
         if not data:
-            print("Нет данных для выбранного периода")
+            await self.db.report_task.edit(data=ErrorMessage(error_message="Нет данных для отчета"), id=task_id)
+            await self.db.commit()
             return None
 
         os.makedirs("report", exist_ok=True)
@@ -137,6 +138,9 @@ class ReportService:
                 ReportTaskReady(status=Status.ready, result_file=file_path), id=task_id
             )
             await self.db.commit()
+        if not file_path:
+            return None 
+
         task = await self.db.report_task.get_one_or_none(id=task_id)
         report_link = f"http://127.0.0.1:8000/report/download/{task_id}"
         if task:

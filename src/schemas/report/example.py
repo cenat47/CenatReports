@@ -1,14 +1,14 @@
 REPORT_EXAMPLES = {
     # === DAILY SALES ===
     "daily_sales": {
-        "summary": "Daily Sales Report",
+        "summary": "Daily Sales Report — Daily Details",
         "value": {
             "report_name": "daily_sales",
             "parameters": {"date_from": "2023-11-16", "date_to": "2025-11-15"},
         },
     },
     "daily_sales_summary": {
-        "summary": "Daily Sales Report Summary",
+        "summary": "Daily Sales Report Summary — Summary",
         "value": {
             "report_name": "daily_sales_summary",
             "parameters": {"date_from": "2023-11-16", "date_to": "2025-11-15"},

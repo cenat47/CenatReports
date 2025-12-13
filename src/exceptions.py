@@ -105,7 +105,7 @@ class ReportParametersValidationHTTPException(MainException):
 
 class ReportIsNotReady(MainException):
     status_code = status.HTTP_400_BAD_REQUEST
-    detail = "Отчёт ещё не готов"
+    detail = "Отчёт ещё не готов, проверьте его статус"
 
 
 # Базовые бизнес-исключения приложения (не HTTP)

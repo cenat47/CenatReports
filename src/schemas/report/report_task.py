@@ -11,7 +11,8 @@ class Status(str, Enum):
     ready = "ready"
     error = "error"
 
-
+class ErrorMessage(BaseModel):
+    error_message: str
 class ReportTaskAdd(BaseModel):
     user_id: uuid.UUID
     template_id: int
