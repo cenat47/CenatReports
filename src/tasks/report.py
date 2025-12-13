@@ -77,7 +77,9 @@ class ReportService:
     async def _save_report_to_csv(self, task_id: str, data, is_summary: bool = False):
         """Универсальный метод сохранения отчета в CSV, работает с одним объектом или списком объектов"""
         if not data:
-            await self.db.report_task.edit(data=ErrorMessage(error_message="Нет данных для отчета"), id=task_id)
+            await self.db.report_task.edit(
+                data=ErrorMessage(error_message="Нет данных для отчета"), id=task_id
+            )
             await self.db.commit()
             return None
 
@@ -139,7 +141,7 @@ class ReportService:
             )
             await self.db.commit()
         if not file_path:
-            return None 
+            return None
 
         task = await self.db.report_task.get_one_or_none(id=task_id)
         report_link = f"http://127.0.0.1:8000/report/download/{task_id}"

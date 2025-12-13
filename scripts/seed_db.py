@@ -291,7 +291,6 @@ async def create_report_templates(session):
         ),
     ]
 
-
     for name, description in reports:
         # --- Основной отчёт ---
         report = ReportTemplateORM(
