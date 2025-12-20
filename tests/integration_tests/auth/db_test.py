@@ -12,3 +12,12 @@ async def test_create_report_as_manager(authenticated_manager):
     assert resp.status_code == 200
     data = resp.json()
     assert "id" in data or "task_id" in data
+
+
+
+@pytest.mark.asyncio
+async def test_create_report_as_user(authenticated_ac):
+    resp = await authenticated_ac.post("/report/generate", json=REPORT_PAYLOAD)
+    assert resp.status_code == 403
+
+
