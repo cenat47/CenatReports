@@ -8,6 +8,7 @@ from schemas.auth.user import UserLogin, UserRequest, UserReverify, UserVerify
 from schemas.security.audit import AuditLogCreate, AuditAction
 from services.auth import UserService
 from services.audit import AuditService
+from siem import log_event
 from src.api.dependencies import DBDep, get_current_active_user_Dep
 from src.exceptions import InvalidCredentialsException, InvalidTokenException
 
@@ -129,6 +130,7 @@ async def login(
         # secure=True,
         samesite="lax",
     )
+    await log_event("login_success", user_id=user.id)
     return token
 
 

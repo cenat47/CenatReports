@@ -15,6 +15,7 @@ from schemas.report.report_task import ReportRequest, ReportTaskStatus
 from schemas.security.audit import AuditLogCreate, AuditAction
 from services.report import ReportServiceS
 from services.audit import AuditService
+from siem import log_event
 from src.api.dependencies import (
     get_current_active_manager_Dep,
     get_current_active_user_Dep,
@@ -61,6 +62,7 @@ async def generate_report(
     http_request: Request,
     request: ReportRequest = Body(openapi_examples=REPORT_EXAMPLES),
 ):
+    await log_event("report_requested", user_id=user.id, details={"template": request.report_name})
     try:
         task = await ReportServiceS(db).generate_report_task(
             user_id=user.id,

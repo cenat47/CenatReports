@@ -31,6 +31,7 @@ class Settings(BaseSettings):
     ATTEMPT_LIMIT: int
     BLOCK_TIME_SECONDS: int
     FAILED_TTL_SECONDS: int
+    ELASTICSEARCH_URL: str
 
     @property
     def DB_URL(self):

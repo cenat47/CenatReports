@@ -32,6 +32,7 @@ async def test_manager_exists_in_db(db):
     assert result is not None
     assert result.role == "manager"
 
+
 @pytest.mark.asyncio
 async def test_refresh_token_success(ac):
     resp = await ac.post("/auth/login", json=register_data)
@@ -46,6 +47,7 @@ async def test_refresh_token_success(ac):
     assert refresh_resp.status_code == 200
     assert "access_token" in ac.cookies
 
+
 @pytest.mark.asyncio
 async def test_refresh_token_invalid(ac):
     ac.cookies.clear()
@@ -54,6 +56,7 @@ async def test_refresh_token_invalid(ac):
     refresh_resp = await ac.post("/auth/refresh")
     assert refresh_resp.status_code == 401
     assert "access_token" not in ac.cookies
+
 
 @pytest.mark.asyncio
 async def test_logout(ac):
