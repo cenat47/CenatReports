@@ -1,5 +1,5 @@
 # 📊 Report Service  
-Сервис генерации отчётов (CSV) на основе данных из базы данных, с поддержкой фоновых задач, авторизации, проверки статуса и скачивания файлов через API. Проект реализован на FastAPI с использованием Celery, Redis, PostgreSQL и Docker.
+Сервис генерации отчётов (CSV) на основе данных из базы данных, с поддержкой фоновых задач, авторизации, проверки статуса и скачивания файлов через API. Проект реализован на FastAPI с использованием Celery, Redis, PostgreSQL, Docker, SIEM (ELK Stack) и HSM для криптографии.
 
 ---
 
@@ -155,7 +155,23 @@ Swagger UI: http://localhost:8000/docs
 
 ReDoc: http://localhost:8000/redoc
 
+## 🚀 Планы доработки (Q1 2026)
 
+### 🔍 SIEM с Correlation ID (ELK Stack)
+- **Elasticsearch 8.x + Kibana 8.x** для централизованного логирования
+- **Correlation ID** для трейсинга запросов 
+- **Filebeat** в Docker для сбора логов контейнеров
+- **Дашборды Kibana**: метрики API, Celery tasks, ошибки БД
+- **Корреляционные правила**: обнаружение аномалий, DDoS, brute-force
+- **Middleware для логов**
+
+
+### 🔐 HSM для JWT и подписей
+- **YubiHSM2 / Nitrokey HSM** через PKCS#11 + OpenSSL engine
+- **Подпись JWT** приватным ключом из HSM (≥ EC P-384)
+- **Цифровая подпись отчетов** (PDF/A3 + XAdES для compliance)
+- **Автоматическая ротация ключей** с HSM (ежемесячно)
+- **FIPS 140-2 Level 2** совместимость для regulated industries
 
 ---
 ## 🧑‍💻 Автор
