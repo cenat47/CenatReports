@@ -62,7 +62,16 @@ async def generate_report(
     http_request: Request,
     request: ReportRequest = Body(openapi_examples=REPORT_EXAMPLES),
 ):
-    await log_event("report_requested", user_id=user.id, details={"template": request.report_name})
+    await log_event(
+        event="report_requested",
+        user_id=user.id,
+        details={
+            "report.template": request.report_name,
+            "report.format": request.format,
+            "client.ip": request.client.host,
+            "http.user_agent": request.headers.get("user-agent"),
+        },
+    )
     try:
         task = await ReportServiceS(db).generate_report_task(
             user_id=user.id,

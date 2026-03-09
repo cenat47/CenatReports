@@ -37,10 +37,23 @@ router = APIRouter(prefix="/auth", tags=["Аутентификация"])
     },
 )
 async def register(user: UserRequest, db: DBDep):
-    return [
-        await UserService(db).register_new_user(user),
-        "На почту было направлено письмо с кодом для подтверждения, обратитесь к /verify",
-    ]
+    await log_event(
+        "auth_register_attempt",
+        details={
+            "auth.email": user.email,
+        },
+    )
+    result = await UserService(db).register_new_user(user)
+    await log_event(
+        "auth_register_success",
+        details={
+            "auth.email": user.email,
+        },
+    )
+    return {
+        "user": result,
+        "message": "Пользователь успешно зарегистрирован. Проверьте почту для подтверждения email."
+    }
 
 
 @router.post(
@@ -54,8 +67,21 @@ async def register(user: UserRequest, db: DBDep):
         400: {"description": "Неверный код подтверждения"},
     },
 )
-async def verify(data: UserVerify, db: DBDep):
-    return await UserService(db).verify_user(data)
+async def verify(data: UserVerify, db: DBDep, request: Request):
+    await log_event(
+        "auth_verify_attempt",
+        details={
+            "auth.email": data.email,
+        },
+    )
+    result = await UserService(db).verify_user(data, request.client.host)
+    await log_event(
+        "auth_verify_success",
+        details={
+            "auth.email": data.email,
+        },
+    )
+    return result
 
 
 @router.post(
@@ -67,6 +93,12 @@ async def verify(data: UserVerify, db: DBDep):
     responses={200: {"description": "Код отправлен (если email существует)"}},
 )
 async def reverify(data: UserReverify, db: DBDep):
+    await log_event(
+        "auth_reverify_requested",
+        details={
+            "auth.email": data.email,
+        },
+    )
     return await UserService(db).reverify_user(data)
 
 
@@ -93,6 +125,15 @@ async def login(
 ) -> Token:
     user = await UserService(db).authenticate_user(data, request.client.host)
     if not user:
+        await log_event(
+            "auth_login_failed",
+            details={
+                "auth.email": data.email,
+                "client.ip": request.client.host,
+                "user_agent": request.headers.get("user-agent"),
+            },
+            severity="warning",
+        )
         await AuditService(db).log(
             AuditLogCreate(
                 action=AuditAction.LOGIN_FAILED,
@@ -102,9 +143,7 @@ async def login(
             )
         )
         raise InvalidCredentialsException
-
     token = await UserService(db).create_token(user.id, request.client.host)
-
     await AuditService(db).log(
         AuditLogCreate(
             action=AuditAction.LOGIN_SUCCESS,
@@ -113,7 +152,6 @@ async def login(
             user_agent=request.headers.get("user-agent"),
         )
     )
-
     response.set_cookie(
         "access_token",
         token.access_token,
@@ -130,7 +168,15 @@ async def login(
         # secure=True,
         samesite="lax",
     )
-    await log_event("login_success", user_id=user.id)
+    await log_event(
+        "auth_login_success",
+        user_id=user.id,
+        details={
+            "client.ip": request.client.host,
+            "user_agent": request.headers.get("user-agent"),
+            "auth.method": "password",
+        },
+    )
     return token
 
 
@@ -149,21 +195,48 @@ async def login(
 async def logout(request: Request, response: Response, db: DBDep):
     access_token = request.cookies.get("access_token")
     refresh_token = request.cookies.get("refresh_token")
+
     if not access_token and not refresh_token:
+        await log_event(
+            "auth_logout_without_tokens",
+            details={
+                "client.ip": request.client.host,
+                "user_agent": request.headers.get("user-agent"),
+            },
+            severity="warning",
+        )
         return "Вы уже вышли из системы"
+    user_id = None
     if refresh_token:
         try:
             refresh_token_uuid = uuid.UUID(refresh_token)
         except (ValueError, TypeError):
+            await log_event(
+                "auth_logout_invalid_token_format",
+                details={
+                    "client.ip": request.client.host,
+                    "raw_token": str(refresh_token)[:12],
+                },
+                severity="warning",
+            )
             raise InvalidTokenException
-
         session = await db.refresh_token.get_one_or_none(
             refresh_token=refresh_token_uuid
         )
         user_id = session.user_id if session else None
+        if not session:
+            await log_event(
+                "auth_logout_session_not_found",
+                details={
+                    "client.ip": request.client.host,
+                },
+                severity="warning",
+            )
 
-        await UserService(db).logout(refresh_token_uuid, ip_address=request.client.host)
-
+        await UserService(db).logout(
+            refresh_token_uuid,
+            ip_address=request.client.host,
+        )
         await AuditService(db).log(
             AuditLogCreate(
                 action=AuditAction.LOGOUT,
@@ -172,11 +245,18 @@ async def logout(request: Request, response: Response, db: DBDep):
                 user_agent=request.headers.get("user-agent"),
             )
         )
-
+        await log_event(
+            "auth_logout_success",
+            user_id=user_id,
+            details={
+                "client.ip": request.client.host,
+                "user_agent": request.headers.get("user-agent"),
+            },
+        )
         response.delete_cookie("refresh_token")
-        if access_token:
-            response.delete_cookie("access_token")
-        return "Вы успешно вышли из системы"
+    if access_token:
+        response.delete_cookie("access_token")
+    return "Вы успешно вышли из системы"
 
 
 @router.post(
@@ -200,16 +280,13 @@ async def refresh_token(request: Request, response: Response, db: DBDep) -> Toke
         raise InvalidTokenException
     try:
         refresh_token_uuid = uuid.UUID(refresh_token)
-
         session = await db.refresh_token.get_one_or_none(
             refresh_token=refresh_token_uuid
         )
-
         new_token = await UserService(db).refresh_token(
             refresh_token_uuid,
             ip_address=request.client.host,
         )
-
         if session:
             await AuditService(db).log(
                 AuditLogCreate(
@@ -219,10 +296,8 @@ async def refresh_token(request: Request, response: Response, db: DBDep) -> Toke
                     user_agent=request.headers.get("user-agent"),
                 )
             )
-
     except (ValueError, TypeError):
         raise InvalidTokenException
-
     response.set_cookie(
         "access_token",
         new_token.access_token,
@@ -274,9 +349,16 @@ async def abort_all_sessions(
             user_id = None
     else:
         user_id = None
-
     await UserService(db).abort_all_sessions(refresh_token, request.client.host)
-
+    await log_event(
+        "auth_abort_all_sessions",
+        user_id=user_id,
+        details={
+            "client.ip": request.client.host,
+            "user_agent": request.headers.get("user-agent"),
+        },
+        severity="warning",
+    )
     if user_id:
         await AuditService(db).log(
             AuditLogCreate(
@@ -286,7 +368,6 @@ async def abort_all_sessions(
                 user_agent=request.headers.get("user-agent"),
             )
         )
-
     response.delete_cookie("access_token")
     response.delete_cookie("refresh_token")
     return {"message": "All sessions was aborted"}

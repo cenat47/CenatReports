@@ -1,31 +1,36 @@
 # src/middleware/siem.py
 from fastapi import Request
-from src.siem import log_event, current_correlation_id
+from src.siem import log_event, set_correlation_id
 from src.main import app
-from uuid import uuid
+import time
+
+
 @app.middleware("http")
 async def siem_middleware(request: Request, call_next):
-    global current_correlation_id
-    current_correlation_id = str(uuid.uuid4())
-    
-    # Лог start запроса
+    correlation_id = set_correlation_id()
+    start_time = time.time()
+
     await log_event(
-        "request_start",
+        "http_request_start",
         details={
-            "method": request.method,
-            "path": request.url.path,
-            "ip": request.client.host
-        }
+            "http.method": request.method,
+            "http.path": request.url.path,
+            "client.ip": request.client.host,
+        },
     )
-    
+
     response = await call_next(request)
-    
-    # Лог end запроса
+
+    duration = int((time.time() - start_time) * 1000)
+
     await log_event(
-        "request_end",
+        "http_request_end",
         details={
-            "status_code": response.status_code,
-            "correlation_id": current_correlation_id
-        }
+            "http.status_code": response.status_code,
+            "duration_ms": duration,
+        },
+        severity="error" if response.status_code >= 500 else "info",
     )
+
+    response.headers["X-Correlation-ID"] = correlation_id
     return response

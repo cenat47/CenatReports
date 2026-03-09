@@ -4,14 +4,14 @@ REPORT_EXAMPLES = {
         "summary": "Daily Sales Report — Daily Details",
         "value": {
             "report_name": "daily_sales",
-            "parameters": {"date_from": "2023-11-16", "date_to": "2025-11-15"},
+            "parameters": {"date_from": "2022-11-16", "date_to": "2026-11-15"},
         },
     },
     "daily_sales_summary": {
         "summary": "Daily Sales Report Summary — Summary",
         "value": {
             "report_name": "daily_sales_summary",
-            "parameters": {"date_from": "2023-11-16", "date_to": "2025-11-15"},
+            "parameters": {"date_from": "2022-11-16", "date_to": "2026-11-15"},
         },
     },
     # === CATEGORY REPORTS ===
@@ -20,8 +20,8 @@ REPORT_EXAMPLES = {
         "value": {
             "report_name": "sales_by_categories",
             "parameters": {
-                "date_from": "2025-01-01",
-                "date_to": "2025-01-31",
+                "date_from": "2022-01-01",
+                "date_to": "2026-01-31",
                 "category_id": 3,
                 "top": 10,
             },
@@ -32,8 +32,8 @@ REPORT_EXAMPLES = {
         "value": {
             "report_name": "sales_by_categories_summary",
             "parameters": {
-                "date_from": "2025-01-01",
-                "date_to": "2025-01-31",
+                "date_from": "2022-01-01",
+                "date_to": "2026-01-31",
                 "category_id": 3,
                 "top": 5,
             },
@@ -45,9 +45,9 @@ REPORT_EXAMPLES = {
         "value": {
             "report_name": "sales_by_products",
             "parameters": {
-                "date_from": "2025-01-01",
-                "date_to": "2025-01-31",
-                "product_id": 15,
+                "date_from": "2022-01-01",
+                "date_to": "2026-01-31",
+                "product_id": 5,
                 "top": 5,
             },
         },
@@ -57,9 +57,9 @@ REPORT_EXAMPLES = {
         "value": {
             "report_name": "sales_by_products_summary",
             "parameters": {
-                "date_from": "2025-01-01",
-                "date_to": "2025-01-31",
-                "product_id": 15,
+                "date_from": "2022-01-01",
+                "date_to": "2026-01-31",
+                "product_id": 5,
                 "top": 5,
             },
         },
@@ -70,8 +70,8 @@ REPORT_EXAMPLES = {
         "value": {
             "report_name": "sales_by_categories_summary",
             "parameters": {
-                "date_from": "2025-01-01",
-                "date_to": "2025-01-31",
+                "date_from": "2022-01-01",
+                "date_to": "2026-01-31",
                 "top": 5,
             },
         },
@@ -82,8 +82,8 @@ REPORT_EXAMPLES = {
         "value": {
             "report_name": "sales_by_products_summary",
             "parameters": {
-                "date_from": "2025-01-01",
-                "date_to": "2025-01-31",
+                "date_from": "2022-01-01",
+                "date_to": "2026-01-31",
                 "top": 5,
             },
         },
@@ -93,9 +93,9 @@ REPORT_EXAMPLES = {
         "value": {
             "report_name": "customers",
             "parameters": {
-                "date_from": "2025-01-01",
-                "date_to": "2025-01-31",
-                "customer_id": 301,
+                "date_from": "2022-01-01",
+                "date_to": "2026-01-31",
+                "customer_id": 10,
             },
         },
     },
@@ -104,8 +104,8 @@ REPORT_EXAMPLES = {
         "value": {
             "report_name": "customers_summary",
             "parameters": {
-                "date_from": "2025-01-01",
-                "date_to": "2025-01-31",
+                "date_from": "2022-01-01",
+                "date_to": "2026-01-31",
                 "top": 10,
             },
         },
@@ -115,8 +115,8 @@ REPORT_EXAMPLES = {
         "value": {
             "report_name": "payments",
             "parameters": {
-                "date_from": "2025-01-01",
-                "date_to": "2025-01-31",
+                "date_from": "2022-01-01",
+                "date_to": "2026-01-31",
                 "payment_method": "card",
             },
         },
@@ -125,7 +125,7 @@ REPORT_EXAMPLES = {
         "summary": "Payments by Method — Summary",
         "value": {
             "report_name": "payments_summary",
-            "parameters": {"date_from": "2025-01-01", "date_to": "2025-01-31"},
+            "parameters": {"date_from": "2022-01-01", "date_to": "2026-01-31"},
         },
     },
     "payments_top": {
@@ -133,8 +133,8 @@ REPORT_EXAMPLES = {
         "value": {
             "report_name": "payments_summary",
             "parameters": {
-                "date_from": "2025-01-01",
-                "date_to": "2025-01-31",
+                "date_from": "2022-01-01",
+                "date_to": "2026-01-31",
                 "top": 2,
             },
         },

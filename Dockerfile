@@ -7,4 +7,4 @@ COPY . .
 
 ENV PYTHONPATH=/app
 
-CMD alembic upgrade head && python src/main.py && python scripts/clear_db.py && python scripts/seed_db.py
+CMD alembic upgrade head && python src/main.py
