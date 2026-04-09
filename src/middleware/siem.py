@@ -1,8 +1,8 @@
-# src/middleware/siem.py
 from fastapi import Request
 from src.siem import log_event, set_correlation_id
 from src.main import app
 import time
+
 
 
 @app.middleware("http")
