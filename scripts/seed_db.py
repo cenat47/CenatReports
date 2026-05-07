@@ -2,12 +2,13 @@ import sys
 from pathlib import Path
 
 
+
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
 import asyncio
 import random
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from faker import Faker
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -21,6 +22,9 @@ from src.models.commerce.order_item import OrderItemOrm
 from src.models.commerce.payment import PaymentORM
 from src.models.commerce.product import ProductORM
 from src.models.report.report_template import ReportTemplateORM
+from src.models.auth.user import UserORM
+from src.utils.password_utils import get_password_hash
+from src.config import settings
 
 from src.models.commerce.supplier import SupplierORM
 
@@ -261,6 +265,28 @@ async def create_payments(session, orders):
 
 
 # --------------------------------------------
+# Создание админа
+# --------------------------------------------
+
+
+async def create_admin(session):
+    password_hash = get_password_hash(settings.ADMIN_PASS)
+    admin = UserORM(
+            email=settings.ADMIN_EMAIL,
+            password_hash=password_hash,
+            first_name="System",
+            last_name="Admin",
+            role="superadmin",
+            is_active=True,
+            registered_at=datetime.now(timezone.utc),
+            is_verified=True,
+        )
+    session.add(admin)
+    await session.commit()
+    print(f"Admin user created: {settings.ADMIN_EMAIL}")
+
+
+# --------------------------------------------
 # Создание шаблонов отчетов
 # --------------------------------------------
 
@@ -329,6 +355,7 @@ async def main():
         orders = await create_orders(session, customers, products)
         await create_payments(session, orders)
         await create_report_templates(session)
+        await create_admin(session)
 
         print("✅ База данных успешно заполнена!")
 

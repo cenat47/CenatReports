@@ -15,6 +15,7 @@ from src.schemas.report.sales_daily import SalesDailyParams
 from src.utils.db_manager import DBManager
 from src.database import async_session_maker_null_pооl
 from src.tasks.email_tasks import send_report_ready_email_task
+from src.siem import log_event
 
 
 class ReportService:
@@ -81,6 +82,15 @@ class ReportService:
                 data=ErrorMessage(error_message="Нет данных для отчета"), id=task_id
             )
             await self.db.commit()
+
+            await log_event(
+                "report_no_data",
+                details={
+                    "report.task_id": task_id,
+                },
+                severity="warning",
+            )
+
             return None
 
         os.makedirs("report", exist_ok=True)
@@ -119,12 +129,39 @@ class ReportService:
         """Универсальный метод создания отчета"""
         config = self.report_config.get(report_name)
         if not config:
+            await log_event(
+                "report_unknown_type",
+                details={
+                    "report.task_id": task_id,
+                    "report.name": report_name,
+                },
+                severity="error",
+            )
             raise ValueError(f"Unknown report_name: {report_name}")
+
+        await log_event(
+            "report_generation_started",
+            details={
+                "report.task_id": task_id,
+                "report.name": report_name,
+            },
+        )
 
         try:
             validated_params = config["param_model"](**params)
         except ValidationError as e:
             print(f"Ошибка валидации параметров: {e}")
+
+            await log_event(
+                "report_validation_failed",
+                details={
+                    "report.task_id": task_id,
+                    "report.name": report_name,
+                    "error": str(e),
+                },
+                severity="warning",
+            )
+
             return
 
         # Получаем данные
@@ -140,6 +177,16 @@ class ReportService:
                 ReportTaskReady(status=Status.ready, result_file=file_path), id=task_id
             )
             await self.db.commit()
+
+            await log_event(
+                "report_generated",
+                details={
+                    "report.task_id": task_id,
+                    "report.name": report_name,
+                    "report.file": file_path,
+                },
+            )
+
         if not file_path:
             return None
 
@@ -154,16 +201,41 @@ class ReportService:
                     report_link=report_link,
                 )
 
+                await log_event(
+                    "report_email_sent",
+                    user_id=user.id,
+                    details={
+                        "report.task_id": task_id,
+                        "report.name": report_name,
+                        "user.email": user.email,
+                    },
+                )
+
     async def make_report_h(self, task_id: str):
         """Основной метод обработки задачи отчета"""
         task = await self.db.report_task.get_one_or_none(id=task_id)
         if not task:
+            await log_event(
+                "report_task_not_found",
+                details={
+                    "report.task_id": task_id,
+                },
+                severity="error",
+            )
             raise ValueError(f"Task with id {task_id} not found")
 
         report_template = await self.db.report_template.get_one_or_none(
             id=task.template_id
         )
         if not report_template:
+            await log_event(
+                "report_template_not_found",
+                details={
+                    "report.task_id": task_id,
+                    "template.id": str(task.template_id),
+                },
+                severity="error",
+            )
             raise ValueError(f"Report template with id {task.template_id} not found")
 
         params = json.loads(task.parameters)

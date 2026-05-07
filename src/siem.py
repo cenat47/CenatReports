@@ -3,7 +3,8 @@ import httpx
 import uuid
 from datetime import datetime
 from contextvars import ContextVar
-from config import settings
+from fastapi.encoders import jsonable_encoder
+from src.config import settings
 
 correlation_id_ctx: ContextVar[str | None] = ContextVar("correlation_id", default=None)
 
@@ -35,4 +36,7 @@ async def log_event(
     }
 
     async with httpx.AsyncClient() as client:
-        await client.post(settings.ELASTICSEARCH_URL, json=doc)
+        await client.post(
+            settings.ELASTICSEARCH_URL,
+            json=jsonable_encoder(doc),
+        )

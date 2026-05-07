@@ -45,6 +45,7 @@ services:
       - REDIS_HOST=redis
       - REDIS_PASS=${REDIS_PASS}
     volumes:
+      - .:/app
       - ./reports:/app/report
     ports:
       - "8000:8000"

@@ -4,6 +4,8 @@ from services.audit import AuditService
 from schemas.auth.user import UserRoleUpdate, UserRoleUpdateConfirm
 from schemas.security.audit import AuditLogCreate, AuditAction
 from src.api.dependencies import DBDep, get_current_active_admin_Dep
+from src.siem import log_event
+
 
 
 router = APIRouter(prefix="/admin", tags=["Администрирование"])
@@ -83,6 +85,19 @@ async def update_user_role(
         )
     )
 
+    await log_event(
+        "admin_role_change_request",
+        user_id=current_user.id,
+        details={
+            "target.email": payload.email,
+            "target.user_id": str(target_user.id) if target_user else None,
+            "requested_role": payload.new_role,
+            "client.ip": request.client.host,
+            "user_agent": request.headers.get("user-agent"),
+        },
+        severity="warning",
+    )
+
     return result
 
 
@@ -131,6 +146,20 @@ async def confirm_user_role_update(
             user_agent=request.headers.get("user-agent"),
             details=f"Admin {current_user.email} confirmed role change for user {payload.email}",
         )
+    )
+
+    await log_event(
+        "admin_role_change_confirm",
+        user_id=current_user.id,
+        details={
+            "target.email": payload.email,
+            "target.user_id": str(target_user.id) if target_user else None,
+            "old_role": old_role,
+            "new_role": payload.new_role,
+            "client.ip": request.client.host,
+            "user_agent": request.headers.get("user-agent"),
+        },
+        severity="warning",
     )
 
     return result

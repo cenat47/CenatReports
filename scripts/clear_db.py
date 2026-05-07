@@ -30,6 +30,7 @@ async def clear_tables(session):
     await session.execute(text("DELETE FROM suppliers"))
     await session.execute(text("DELETE FROM categories"))
     await session.execute(text("DELETE FROM users"))
+    await session.execute(text("DELETE FROM audit_logs"))
     await session.execute(text("DELETE FROM refresh_token"))
     await session.execute(text("DELETE FROM report_templates"))
 
@@ -39,20 +40,7 @@ async def clear_tables(session):
         delete(UserORM).where(UserORM.email == settings.ADMIN_EMAIL)
     )
     await session.commit()
-    password_hash = get_password_hash(settings.ADMIN_PASS)
-    admin = UserORM(
-        email=settings.ADMIN_EMAIL,
-        password_hash=password_hash,
-        first_name="System",
-        last_name="Admin",
-        role="superadmin",
-        is_active=True,
-        registered_at=datetime.now(timezone.utc),
-        is_verified=True,
-    )
-    session.add(admin)
-    await session.commit()
-    print(f"Admin user created: {settings.ADMIN_EMAIL}")
+    
 
 
 async def main():

@@ -67,9 +67,9 @@ async def generate_report(
         user_id=user.id,
         details={
             "report.template": request.report_name,
-            "report.format": request.format,
-            "client.ip": request.client.host,
-            "http.user_agent": request.headers.get("user-agent"),
+            "report.parameters": request.parameters,
+            "client.ip": http_request.client.host,
+            "http.user_agent": http_request.headers.get("user-agent"),
         },
     )
     try:
