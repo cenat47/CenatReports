@@ -5,4 +5,5 @@ celerybeat-schedule.bak
 celerybeat-schedule.dat
 celerybeat-schedule.dir
 report/*
+reports/*
 !report/.gitkeep
